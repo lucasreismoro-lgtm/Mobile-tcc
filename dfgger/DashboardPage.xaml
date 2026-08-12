@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="dfgger.DashboardPage"
+             BackgroundColor="#0F172A">
+
+    <ScrollView Padding="20">
+        <VerticalStackLayout Spacing="20">
+
+            <Grid ColumnDefinitions="*, Auto" VerticalOptions="Center" Margin="0,0,0,10">
+                <HorizontalStackLayout Grid.Column="0" Spacing="12" VerticalOptions="Center">
+                    <Border BackgroundColor="#1E293B" 
+                            Stroke="#2563EB" 
+                            StrokeThickness="2" 
+                            StrokeShape="RoundRectangle 22" 
+                            HeightRequest="45" 
+                            WidthRequest="45" 
+                            Padding="0">
+                        <Label Text="👤" 
+                               FontSize="22" 
+                               HorizontalOptions="Center" 
+                               VerticalOptions="Center" />
+                    </Border>
+
+                    <VerticalStackLayout VerticalOptions="Center" Spacing="2">
+                        <Label x:Name="LblNomeUsuario" 
+                               Text="Carregando..." 
+                               FontSize="16" 
+                               FontAttributes="Bold" 
+                               TextColor="White" />
+                        <Label x:Name="LblCargoUsuario" 
+                               Text="Cargo..." 
+                               FontSize="12" 
+                               TextColor="#94A3B8" />
+                    </VerticalStackLayout>
+                </HorizontalStackLayout>
+
+                <HorizontalStackLayout Grid.Column="1" HorizontalOptions="End" Spacing="5" VerticalOptions="Center">
+                    <Ellipse x:Name="StatusIndicator" WidthRequest="12" HeightRequest="12" Fill="Gray"/>
+                    <Label x:Name="StatusLabel" Text="Verificando..." FontSize="12" TextColor="#94A3B8" VerticalOptions="Center"/>
+                </HorizontalStackLayout>
+            </Grid>
+
+            <VerticalStackLayout Spacing="4">
+                <Label Text="Sistema de Monitoramento" FontSize="24" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center"/>
+                <Label Text="Ativo e Protegido" FontSize="14" TextColor="#60A5FA" HorizontalOptions="Center" Margin="0,0,0,10"/>
+            </VerticalStackLayout>
+
+            <Border BackgroundColor="#1E293B" StrokeShape="RoundRectangle 20" Padding="20" StrokeThickness="0">
+                <Grid ColumnDefinitions="*, Auto">
+                    <VerticalStackLayout VerticalOptions="Center">
+                        <Label Text="CONTROLE GERAL" FontSize="16" FontAttributes="Bold" TextColor="White"/>
+                        <Label Text="Liga/Desliga tudo" FontSize="12" TextColor="#94A3B8"/>
+                    </VerticalStackLayout>
+                    <Switch Grid.Column="1" x:Name="SwitchGeral" Toggled="OnGeralToggled" Scale="1.2" OnColor="#2563EB"/>
+                </Grid>
+            </Border>
+
+            <BoxView HeightRequest="1" Color="#334155" Margin="0,5"/>
+
+            <VerticalStackLayout Spacing="15">
+                <Label Text="Configurações Individuais" FontSize="18" FontAttributes="Bold" TextColor="#94A3B8"/>
+
+                <Border BackgroundColor="#1E293B" StrokeShape="RoundRectangle 15" StrokeThickness="0" Padding="20,15">
+                    <Grid ColumnDefinitions="*, Auto">
+                        <Label Text="Sensor de Presença" VerticalOptions="Center" TextColor="White" FontAttributes="Bold"/>
+                        <Switch Grid.Column="1" x:Name="SwitchPresenca" Toggled="OnSensorToggled" OnColor="#60A5FA"/>
+                    </Grid>
+                </Border>
+
+                <Border BackgroundColor="#1E293B" StrokeShape="RoundRectangle 15" StrokeThickness="0" Padding="20,15">
+                    <Grid ColumnDefinitions="*, Auto">
+                        <Label Text="Sensor de Calor" VerticalOptions="Center" TextColor="White" FontAttributes="Bold"/>
+                        <Switch Grid.Column="1" x:Name="SwitchCalor" Toggled="OnSensorToggled" OnColor="#60A5FA"/>
+                    </Grid>
+                </Border>
+
+                <Border BackgroundColor="#1E293B" StrokeShape="RoundRectangle 15" StrokeThickness="0" Padding="20,15">
+                    <Grid ColumnDefinitions="*, Auto">
+                        <Label Text="Alarme Sonoro" VerticalOptions="Center" TextColor="White" FontAttributes="Bold"/>
+                        <Switch Grid.Column="1" x:Name="SwitchAlarme" Toggled="OnSensorToggled" OnColor="#60A5FA"/>
+                    </Grid>
+                </Border>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="10" Margin="0,15,0,0">
+                <Button Text="VER MEMBROS DA FAMÍLIA" 
+                        BackgroundColor="#2563EB" 
+                        TextColor="White" 
+                        FontAttributes="Bold"
+                        CornerRadius="15" 
+                        HeightRequest="50" 
+                        Clicked="OnVerMembrosClicked"/>
+
+                <Button Text="VER HISTÓRICO DE EVENTOS" 
+                        BackgroundColor="#334155" 
+                        TextColor="#94A3B8" 
+                        CornerRadius="15" 
+                        HeightRequest="50" 
+                        Clicked="OnVerLogsClicked"/>
+
+                <Button Text="SIMULAR DETECÇÃO DE MOVIMENTO" 
+                        BackgroundColor="#F59E0B" 
+                        TextColor="Black" 
+                        CornerRadius="15" 
+                        HeightRequest="50" 
+                        Clicked="OnSimularSensorClicked"/>
+            </VerticalStackLayout>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

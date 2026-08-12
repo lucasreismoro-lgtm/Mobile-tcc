@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="dfgger.LoginPage"
+             BackgroundColor="#0B1A30"
+             NavigationPage.HasNavigationBar="False">
+
+    <ScrollView Padding="25">
+        <VerticalStackLayout Spacing="20" VerticalOptions="Center">
+
+            <Image Source="shield.png" 
+                   HeightRequest="90" 
+                   WidthRequest="90" 
+                   HorizontalOptions="Center" 
+                   Margin="0,20,0,0" />
+
+            <Label Text="LOGIN" 
+                   FontSize="26" 
+                   FontAttributes="Bold" 
+                   TextColor="White" 
+                   HorizontalOptions="Center" 
+                   Margin="0,0,0,10" />
+
+            <VerticalStackLayout Spacing="12">
+
+                <Frame BackgroundColor="#1E293B" CornerRadius="10" Padding="12,2" HasShadow="False" BorderColor="Transparent">
+                    <Entry x:Name="TxtNome" 
+                           Placeholder="Nome Completo" 
+                           PlaceholderColor="#94A3B8" 
+                           TextColor="White" 
+                           FontSize="14" />
+                </Frame>
+
+                <Frame BackgroundColor="#1E293B" CornerRadius="10" Padding="12,2" HasShadow="False" BorderColor="Transparent">
+                    <Entry x:Name="TxtCpf" 
+                           Placeholder="CPF (Apenas números)" 
+                           PlaceholderColor="#94A3B8" 
+                           TextColor="White" 
+                           Keyboard="Numeric" 
+                           FontSize="14" />
+                </Frame>
+
+                <Frame BackgroundColor="#1E293B" CornerRadius="10" Padding="12,2" HasShadow="False" BorderColor="Transparent">
+                    <Entry x:Name="TxtCep" 
+                           Placeholder="CEP (Apenas números)" 
+                           PlaceholderColor="#94A3B8" 
+                           TextColor="White" 
+                           Keyboard="Numeric" 
+                           FontSize="14" />
+                </Frame>
+
+                <Frame BackgroundColor="#1E293B" CornerRadius="10" Padding="12,2" HasShadow="False" BorderColor="Transparent">
+                    <Entry x:Name="TxtIdResidencia" 
+                           Placeholder="ID Residência (Código Secreto)" 
+                           PlaceholderColor="#94A3B8" 
+                           TextColor="White" 
+                           FontSize="14" />
+                </Frame>
+
+            </VerticalStackLayout>
+
+            <Button x:Name="BtnEntrar"
+                    Text="ENTRAR NO SISTEMA" 
+                    BackgroundColor="#2563EB" 
+                    TextColor="White" 
+                    FontAttributes="Bold" 
+                    FontSize="15"
+                    CornerRadius="12" 
+                    HeightRequest="50" 
+                    Margin="0,15,0,0"
+                    Clicked="BtnEntrar_Clicked" />
+
+            <ActivityIndicator x:Name="IndicadorCarregando" 
+                               IsRunning="False" 
+                               IsVisible="False" 
+                               Color="#2563EB" 
+                               HorizontalOptions="Center" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

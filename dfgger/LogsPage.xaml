@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="dfgger.LogsPage"
+             BackgroundColor="#0F172A">
+
+    <VerticalStackLayout Padding="20" Spacing="20">
+
+        <Label Text="Registro de Eventos" 
+               FontSize="22" 
+               FontAttributes="Bold" 
+               TextColor="White" 
+               HorizontalOptions="Start"/>
+
+        <!-- Lista de Logs -->
+        <CollectionView x:Name="LogList" Margin="0,10,0,0">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <!-- Card de cada evento -->
+                    <Border BackgroundColor="#1E293B" 
+                            StrokeShape="RoundRectangle 12" 
+                            StrokeThickness="0" 
+                            Margin="0,0,0,10" 
+                            Padding="15">
+                        <Grid ColumnDefinitions="Auto, *">
+                            <!-- Indicador de Status (Cor) -->
+                            <BoxView WidthRequest="8" 
+                                     CornerRadius="4" 
+                                     Color="{Binding StatusColor}" 
+                                     Margin="0,0,15,0"/>
+
+                            <VerticalStackLayout Grid.Column="1" Spacing="5">
+                                <Label Text="{Binding Titulo}" FontAttributes="Bold" TextColor="White"/>
+                                <Label Text="{Binding Horario}" FontSize="12" TextColor="#94A3B8"/>
+                            </VerticalStackLayout>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </VerticalStackLayout>
+</ContentPage>
