@@ -3,8 +3,20 @@
   "WorkspaceRootPath": "C:\\Users\\lucas\\OneDrive\\Documentos\\GitHub\\Mobile-tcc\\dfgger\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{370BB3C1-7D41-FB14-B997-C9B9569079E8}|dfgger.csproj|c:\\users\\lucas\\onedrive\\documentos\\github\\mobile-tcc\\dfgger\\loginpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{370BB3C1-7D41-FB14-B997-C9B9569079E8}|dfgger.csproj|solutionrelative:loginpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{370BB3C1-7D41-FB14-B997-C9B9569079E8}|dfgger.csproj|c:\\users\\lucas\\onedrive\\documentos\\github\\mobile-tcc\\dfgger\\resources\\raw\\conexao.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{370BB3C1-7D41-FB14-B997-C9B9569079E8}|dfgger.csproj|solutionrelative:resources\\raw\\conexao.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{370BB3C1-7D41-FB14-B997-C9B9569079E8}|dfgger.csproj|c:\\users\\lucas\\onedrive\\documentos\\github\\mobile-tcc\\dfgger\\sistemaservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{370BB3C1-7D41-FB14-B997-C9B9569079E8}|dfgger.csproj|solutionrelative:sistemaservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{370BB3C1-7D41-FB14-B997-C9B9569079E8}|dfgger.csproj|c:\\users\\lucas\\onedrive\\documentos\\github\\mobile-tcc\\dfgger\\dashboardpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{370BB3C1-7D41-FB14-B997-C9B9569079E8}|dfgger.csproj|solutionrelative:dashboardpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{370BB3C1-7D41-FB14-B997-C9B9569079E8}|dfgger.csproj|c:\\users\\lucas\\onedrive\\documentos\\github\\mobile-tcc\\dfgger\\loginpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
@@ -18,24 +30,63 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "conexao.json",
+              "DocumentMoniker": "C:\\Users\\lucas\\OneDrive\\Documentos\\GitHub\\Mobile-tcc\\dfgger\\Resources\\Raw\\conexao.json",
+              "RelativeDocumentMoniker": "Resources\\Raw\\conexao.json",
+              "ToolTip": "C:\\Users\\lucas\\OneDrive\\Documentos\\GitHub\\Mobile-tcc\\dfgger\\Resources\\Raw\\conexao.json",
+              "RelativeToolTip": "Resources\\Raw\\conexao.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-08-12T22:02:41.003Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 0,
+              "Title": "LoginPage.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\lucas\\OneDrive\\Documentos\\GitHub\\Mobile-tcc\\dfgger\\LoginPage.xaml.cs",
+              "RelativeDocumentMoniker": "LoginPage.xaml.cs",
+              "ToolTip": "C:\\Users\\lucas\\OneDrive\\Documentos\\GitHub\\Mobile-tcc\\dfgger\\LoginPage.xaml.cs",
+              "RelativeToolTip": "LoginPage.xaml.cs",
+              "ViewState": "AgIAABIAAAAAAAAAAAAYwCYAAABDAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-12T21:33:20.838Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "DashboardPage.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\lucas\\OneDrive\\Documentos\\GitHub\\Mobile-tcc\\dfgger\\DashboardPage.xaml.cs",
+              "RelativeDocumentMoniker": "DashboardPage.xaml.cs",
+              "ToolTip": "C:\\Users\\lucas\\OneDrive\\Documentos\\GitHub\\Mobile-tcc\\dfgger\\DashboardPage.xaml.cs",
+              "RelativeToolTip": "DashboardPage.xaml.cs",
+              "ViewState": "AgIAAPUAAAAAAAAAAAAmwAEBAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-12T19:50:34.041Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
               "Title": "SistemaService.cs",
               "DocumentMoniker": "C:\\Users\\lucas\\OneDrive\\Documentos\\GitHub\\Mobile-tcc\\dfgger\\SistemaService.cs",
               "RelativeDocumentMoniker": "SistemaService.cs",
               "ToolTip": "C:\\Users\\lucas\\OneDrive\\Documentos\\GitHub\\Mobile-tcc\\dfgger\\SistemaService.cs",
               "RelativeToolTip": "SistemaService.cs",
-              "ViewState": "AgIAABEAAAAAAAAAAAA+wCMAAABcAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAE4AAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-08-12T19:44:31.662Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 4,
               "Title": "LoginPage.xaml",
               "DocumentMoniker": "C:\\Users\\lucas\\OneDrive\\Documentos\\GitHub\\Mobile-tcc\\dfgger\\LoginPage.xaml",
               "RelativeDocumentMoniker": "LoginPage.xaml",
@@ -43,8 +94,7 @@
               "RelativeToolTip": "LoginPage.xaml",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2026-08-12T19:36:15.769Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-08-12T19:36:15.769Z"
             }
           ]
         }

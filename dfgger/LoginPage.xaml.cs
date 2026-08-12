@@ -5,150 +5,157 @@ using System.Threading.Tasks;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Storage;
 using Google.Cloud.Firestore;
+using Google.Apis.Auth.OAuth2;
 
 namespace dfgger
 {
-    public partial class LoginPage : ContentPage // Classe parcial associada à tela XAML de login
+    public partial class LoginPage : ContentPage
     {
-        private FirestoreDb? _db; // Guarda a instância da conexão com o Firestore
+        private FirestoreDb? _db;
 
-        public LoginPage() // Construtor padrão da tela de Login
+        public LoginPage()
         {
-            InitializeComponent(); // Carrega e desenha os componentes visuais do XAML
+            InitializeComponent();
         }
 
-        protected override async void OnAppearing() // Executado automaticamente ao abrir a página
+        protected override async void OnAppearing()
         {
-            base.OnAppearing(); // Mantém o ciclo de vida nativo de abertura da tela no .NET MAUI
-            await InicializarFirebase(); // Executa o método assíncrono para conectar ao banco
+            base.OnAppearing();
+            await InicializarFirebase();
         }
 
-        private async Task InicializarFirebase() // Método assíncrono para conectar com o Firebase
+        private async Task InicializarFirebase()
         {
-            if (_db != null) return; // Se a conexão já existir, não reconecta
+            if (_db != null) return;
 
-            try // Bloco de proteção contra erros de conexão
+            try
             {
-                using var stream = await FileSystem.OpenAppPackageFileAsync("conexao.json"); // Abre o arquivo de credenciais do app
-                using var reader = new StreamReader(stream); // Leitor para processar o arquivo
-                string jsonConteudo = await reader.ReadToEndAsync(); // Lê o JSON de credenciais para string
+                using var stream = await FileSystem.OpenAppPackageFileAsync("conexao.json");
 
-                FirestoreDbBuilder builder = new FirestoreDbBuilder // Construtor de configurações do Firestore
+                // Adicionada a definicao explicita do escopo Datastore que o Android exige
+                var credential = GoogleCredential.FromStream(stream)
+                    .CreateScoped("https://www.googleapis.com/auth/datastore");
+
+                FirestoreDbBuilder builder = new FirestoreDbBuilder
                 {
-                    ProjectId = "banco-tcc-dc633", // Define a chave identificadora do projeto no Firebase
-                    JsonCredentials = jsonConteudo // Injeta as credenciais para autenticação
+                    ProjectId = "banco-tcc-dc633",
+                    Credential = credential
                 };
-                _db = builder.Build(); // Conclui e salva a instância ativa do banco
+
+                _db = await builder.BuildAsync();
+
+                // Sincroniza a conexão com o SistemaService para a Dashboard
+                SistemaService.FirestoreDb = _db;
+                SistemaService.IsFirebaseConectado = true;
             }
-            catch (Exception ex) // Captura exceções de arquivo ou rede
+            catch (Exception ex)
             {
-                await DisplayAlert("Erro de Conexão", "Falha ao conectar com o banco: " + ex.Message, "OK"); // Exibe pop-up de erro
+                await DisplayAlert("Erro de Conexão", "Falha ao conectar com o banco: " + ex.Message, "OK");
             }
         }
 
-        private async void BtnEntrar_Clicked(object sender, EventArgs e) // Disparado ao clicar no botão Entrar
+        private async void BtnEntrar_Clicked(object sender, EventArgs e)
         {
-            if (_db == null) // Checa se o banco de dados está pronto
+            if (_db == null)
             {
-                await DisplayAlert("Aviso", "O banco de dados ainda não foi inicializado.", "OK"); // Pede para o usuário aguardar
-                return; // Cancela a execução
+                await DisplayAlert("Aviso", "O banco de dados ainda não foi inicializado.", "OK");
+                return;
             }
 
-            string nomeDigitado = TxtNome.Text?.Trim() ?? ""; // Captura o nome e remove espaços nas pontas
-            string cpfDigitado = Regex.Replace(TxtCpf.Text?.Trim() ?? "", @"[^\d]", ""); // Filtra e deixa apenas números no CPF
-            string cepDigitado = Regex.Replace(TxtCep.Text?.Trim() ?? "", @"[^\d]", ""); // Filtra e deixa apenas números no CEP
-            string idResidenciaDigitado = TxtIdResidencia.Text?.Trim() ?? ""; // Captura o ID da residência limpo
+            string nomeDigitado = TxtNome.Text?.Trim() ?? "";
+            string cpfDigitado = Regex.Replace(TxtCpf.Text?.Trim() ?? "", @"[^\d]", "");
+            string cepDigitado = Regex.Replace(TxtCep.Text?.Trim() ?? "", @"[^\d]", "");
+            string idResidenciaDigitado = TxtIdResidencia.Text?.Trim() ?? "";
 
-            if (string.IsNullOrEmpty(nomeDigitado) || string.IsNullOrEmpty(cpfDigitado) || // Valida se Nome ou CPF estão em branco
-                string.IsNullOrEmpty(cepDigitado) || string.IsNullOrEmpty(idResidenciaDigitado)) // Valida se CEP ou ID estão em branco
+            if (string.IsNullOrEmpty(nomeDigitado) || string.IsNullOrEmpty(cpfDigitado) ||
+                string.IsNullOrEmpty(cepDigitado) || string.IsNullOrEmpty(idResidenciaDigitado))
             {
-                await DisplayAlert("Atenção", "Por favor, preencha todos os 4 campos para entrar.", "OK"); // Avisa dados faltantes
-                return; // Interrompe o processo
+                await DisplayAlert("Atenção", "Por favor, preencha todos os 4 campos para entrar.", "OK");
+                return;
             }
 
-            BtnEntrar.IsEnabled = false; // Desativa o botão para evitar cliques duplos
-            IndicadorCarregando.IsVisible = true; // Mostra o carregador na tela
-            IndicadorCarregando.IsRunning = true; // Inicia a animação do carregador
+            BtnEntrar.IsEnabled = false;
+            IndicadorCarregando.IsVisible = true;
+            IndicadorCarregando.IsRunning = true;
 
-            try // Bloco de execução das consultas no Firestore
+            try
             {
-                string nomeEncontrado = ""; // Nome retornado do Firestore
-                string cargoEncontrado = ""; // Cargo retornado do Firestore
-                string cepEncontrado = ""; // CEP retornado do Firestore
-                string idResEncontrado = ""; // ID da residência retornado do Firestore
-                string cpfDonoCasa = ""; // CPF do responsável pela casa
-                bool usuarioAchei = false; // Flag para indicar se o usuário foi achado
+                string nomeEncontrado = "";
+                string cargoEncontrado = "";
+                string cepEncontrado = "";
+                string idResEncontrado = "";
+                string cpfDonoCasa = "";
+                bool usuarioAchei = false;
 
                 // 1º PASSO: Tenta buscar na raiz (Dono da Casa pelo CPF)
-                DocumentReference docDonoRef = _db.Collection("Usuarios").Document(cpfDigitado); // Referência ao documento do CPF
-                DocumentSnapshot snapDono = await docDonoRef.GetSnapshotAsync(); // Busca o documento no banco
+                DocumentReference docDonoRef = _db.Collection("Usuarios").Document(cpfDigitado);
+                DocumentSnapshot snapDono = await docDonoRef.GetSnapshotAsync();
 
-                if (snapDono.Exists) // Caso o CPF seja do Dono da Casa
+                if (snapDono.Exists)
                 {
-                    snapDono.TryGetValue("nome", out nomeEncontrado); // Extrai o nome
-                    snapDono.TryGetValue("cargo", out cargoEncontrado); // Extrai o cargo
-                    snapDono.TryGetValue("cep", out cepEncontrado); // Extrai o CEP
-                    snapDono.TryGetValue("id_residencia", out idResEncontrado); // Extrai o ID da residência
+                    snapDono.TryGetValue("nome", out nomeEncontrado);
+                    snapDono.TryGetValue("cargo", out cargoEncontrado);
+                    snapDono.TryGetValue("cep", out cepEncontrado);
+                    snapDono.TryGetValue("id_residencia", out idResEncontrado);
 
-                    cpfDonoCasa = cpfDigitado; // Grava que o usuário logado é o próprio dono
-                    usuarioAchei = true; // Marca que o usuário foi localizado
+                    cpfDonoCasa = cpfDigitado;
+                    usuarioAchei = true;
                 }
                 else // 2º PASSO: Procura dentro da subcoleção Moradores
                 {
-                    QuerySnapshot todasCasas = await _db.Collection("Usuarios").GetSnapshotAsync(); // Busca todas as residências
+                    QuerySnapshot todasCasas = await _db.Collection("Usuarios").GetSnapshotAsync();
 
-                    foreach (DocumentSnapshot casaDoc in todasCasas.Documents) // Percorre cada casa cadastrada
+                    foreach (DocumentSnapshot casaDoc in todasCasas.Documents)
                     {
-                        DocumentReference docMoradorRef = casaDoc.Reference.Collection("Moradores").Document(cpfDigitado); // Aponta para a subcoleção do morador
-                        DocumentSnapshot snapMorador = await docMoradorRef.GetSnapshotAsync(); // Tenta ler o documento do morador
+                        DocumentReference docMoradorRef = casaDoc.Reference.Collection("Moradores").Document(cpfDigitado);
+                        DocumentSnapshot snapMorador = await docMoradorRef.GetSnapshotAsync();
 
-                        if (snapMorador.Exists) // Se encontrou o morador na subcoleção
+                        if (snapMorador.Exists)
                         {
-                            snapMorador.TryGetValue("nome", out nomeEncontrado); // Extrai nome do morador
-                            snapMorador.TryGetValue("cargo", out cargoEncontrado); // Extrai cargo do morador
+                            snapMorador.TryGetValue("nome", out nomeEncontrado);
+                            snapMorador.TryGetValue("cargo", out cargoEncontrado);
 
-                            casaDoc.TryGetValue("cep", out cepEncontrado); // Herda o CEP da casa do Dono
-                            casaDoc.TryGetValue("id_residencia", out idResEncontrado); // Herda o ID da Residência do Dono
+                            casaDoc.TryGetValue("cep", out cepEncontrado);
+                            casaDoc.TryGetValue("id_residencia", out idResEncontrado);
 
-                            cpfDonoCasa = casaDoc.Id; // Salva o CPF/ID do Dono responsável pela casa
-                            usuarioAchei = true; // Marca que o morador foi localizado
-                            break; // Sai do laço de repetição
+                            cpfDonoCasa = casaDoc.Id;
+                            usuarioAchei = true;
+                            break;
                         }
                     }
                 }
 
-                if (!usuarioAchei) // Se o CPF não for encontrado no banco
+                if (!usuarioAchei)
                 {
-                    await DisplayAlert("Acesso Negado", "Usuário não encontrado. Verifique o CPF digitado.", "OK"); // Avisa CPF inválido
-                    return; // Cancela autenticação
+                    await DisplayAlert("Acesso Negado", "Usuário não encontrado. Verifique o CPF digitado.", "OK");
+                    return;
                 }
 
-                string cepBancoLimpo = Regex.Replace(cepEncontrado ?? "", @"[^\d]", ""); // Limpa caracteres especiais do CEP do banco
+                string cepBancoLimpo = Regex.Replace(cepEncontrado ?? "", @"[^\d]", "");
 
-                bool nomeValido = string.Equals(nomeDigitado, nomeEncontrado, StringComparison.OrdinalIgnoreCase); // Valida nome ignorando maiúsculas/minúsculas
-                bool cepValido = string.Equals(cepDigitado, cepBancoLimpo); // Valida o CEP digitado
-                bool idResValido = string.Equals(idResidenciaDigitado, idResEncontrado, StringComparison.OrdinalIgnoreCase); // Valida o ID da residência digitado
+                bool nomeValido = string.Equals(nomeDigitado, nomeEncontrado, StringComparison.OrdinalIgnoreCase);
+                bool cepValido = string.Equals(cepDigitado, cepBancoLimpo);
+                bool idResValido = string.Equals(idResidenciaDigitado, idResEncontrado, StringComparison.OrdinalIgnoreCase);
 
-                if (nomeValido && cepValido && idResValido) // Se todas as confirmações baterem
+                if (nomeValido && cepValido && idResValido)
                 {
-                    Preferences.Set("CpfDonoCasa", cpfDonoCasa); // Guarda o CPF do Dono na memória local do app para usar no sistema
-
-                    Application.Current.MainPage = new NavigationPage(new DashboardPage(nomeEncontrado, cargoEncontrado)); // Abre a Dashboard
+                    Preferences.Set("CpfDonoCasa", cpfDonoCasa);
+                    Application.Current.MainPage = new NavigationPage(new DashboardPage(nomeEncontrado, cargoEncontrado));
                 }
-                else // Se algum dado não bater
+                else
                 {
-                    await DisplayAlert("Acesso Negado", "Dados incorretos. Verifique Nome, CEP e ID da Residência.", "OK"); // Alerta erro
+                    await DisplayAlert("Acesso Negado", "Dados incorretos. Verifique Nome, CEP e ID da Residência.", "OK");
                 }
             }
-            catch (Exception ex) // Captura falhas de execução
+            catch (Exception ex)
             {
-                await DisplayAlert("Erro", "Erro ao autenticar: " + ex.Message, "OK"); // Exibe mensagem do erro
+                await DisplayAlert("Erro", "Erro ao autenticar: " + ex.Message, "OK");
             }
-            finally // Executado obrigatoriamente no final
+            finally
             {
-                BtnEntrar.IsEnabled = true; // Reativa o botão
-                IndicadorCarregando.IsRunning = false; // Desliga a animação do carregador
-                IndicadorCarregando.IsVisible = false; // Esconde o carregador
+                BtnEntrar.IsEnabled = true;
+                IndicadorCarregando.IsRunning = false;
+                IndicadorCarregando.IsVisible = false;
             }
         }
     }

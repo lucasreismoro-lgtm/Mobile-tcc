@@ -9,118 +9,130 @@ using Google.Cloud.Firestore;
 
 namespace dfgger
 {
-    public partial class DashboardPage : ContentPage // Gerencia o fluxo e eventos visuais do Dashboard mobile
+    public partial class DashboardPage : ContentPage
     {
-        private IDispatcherTimer timer; // Timer em segundo plano para checagem de conexões
-        private bool _isUpdatingProgrammatically = false; // Trava contra disparos em loop dos eventos de switch
+        private IDispatcherTimer? _timer;
+        private bool _isUpdatingProgrammatically = false;
 
-        public DashboardPage(string nome, string cargo) // Construtor principal carregando credenciais da sessão
+        public DashboardPage(string nome, string cargo)
         {
-            InitializeComponent(); // Carrega o layout definido em XAML
+            InitializeComponent();
 
-            LblNomeUsuario.Text = string.IsNullOrWhiteSpace(nome) ? "Usuário" : nome; // Define nome na UI com fallback
+            if (LblNomeUsuario != null)
+                LblNomeUsuario.Text = string.IsNullOrWhiteSpace(nome) ? "Usuário" : nome;
 
-            if (!string.IsNullOrWhiteSpace(cargo)) // Valida e exibe cargo formatado em maiúsculas
+            if (LblCargoUsuario != null)
             {
-                LblCargoUsuario.Text = cargo.Replace("_", " ").ToUpper(); // Substitui underlines por espaços
+                LblCargoUsuario.Text = string.IsNullOrWhiteSpace(cargo)
+                    ? "DONO DA CASA"
+                    : cargo.Replace("_", " ").ToUpper();
             }
-            else
+
+            Preferences.Set("CargoUsuario", cargo ?? "dono");
+
+            ConfigurarTimer();
+        }
+
+        public DashboardPage() : this("Usuário", "dono")
+        {
+        }
+
+        private void ConfigurarTimer()
+        {
+            _timer = Dispatcher.CreateTimer();
+            _timer.Interval = TimeSpan.FromSeconds(5);
+            _timer.Tick += (s, e) => VerificarSistemaAutomaticamente();
+        }
+
+        protected override async void OnAppearing()
+        {
+            base.OnAppearing();
+
+            _timer?.Start();
+            AplicarPermissoesPorCargo();
+            await CarregarEstadoSensoresDoFirebase();
+            VerificarSistemaAutomaticamente();
+        }
+
+        protected override void OnDisappearing()
+        {
+            base.OnDisappearing();
+            // Para o timer quando o usuário sai da tela para economizar recursos e evitar memory leak
+            _timer?.Stop();
+        }
+
+        private void AplicarPermissoesPorCargo()
+        {
+            string cargoUsuario = Preferences.Get("CargoUsuario", "dono").ToLower();
+            bool ePermitido = cargoUsuario.Contains("dono") || cargoUsuario.Contains("admin") || cargoUsuario != "morador";
+
+            MainThread.BeginInvokeOnMainThread(() =>
             {
-                LblCargoUsuario.Text = "DONO DA CASA"; // Cargo padrão em branco
-            }
-
-            Preferences.Set("CargoUsuario", cargo ?? "dono"); // Persiste o cargo localmente para verificação de regras
-
-            timer = Dispatcher.CreateTimer(); // Instancia o timer
-            timer.Interval = TimeSpan.FromSeconds(5); // Define disparo a cada 5s
-            timer.Tick += (s, e) => VerificarSistemaAutomaticamente(); // Associa função de monitoramento
-            timer.Start(); // Inicia execução
-        }
-
-        public DashboardPage() : this("Usuário", "dono") // Construtor de fallback sem parâmetros
-        {
-        }
-
-        protected override async void OnAppearing() // Executado automaticamente ao renderizar a tela
-        {
-            base.OnAppearing(); // Executa rotina base
-            AplicarPermissoesPorCargo(); // Trava/Libera os switches com base no cargo
-            await CarregarEstadoSensoresDoFirebase(); // Busca o estado atual salvo no Firestore
-            VerificarSistemaAutomaticamente(); // Checa conectividade
-        }
-
-        private void AplicarPermissoesPorCargo() // Define interatividade dos elementos visuais
-        {
-            string cargoUsuario = Preferences.Get("CargoUsuario", "dono").ToLower(); // Resgata cargo em caixa baixa
-            bool ePermitido = cargoUsuario.Contains("dono") || cargoUsuario.Contains("admin") || cargoUsuario != "morador"; // Avalia permissão
-
-            MainThread.BeginInvokeOnMainThread(() => // Garante alteração na UI Thread
-            {
-                if (SwitchGeral != null) SwitchGeral.IsEnabled = ePermitido; // Bloqueia/Libera Geral
-                if (SwitchPresenca != null) SwitchPresenca.IsEnabled = ePermitido; // Bloqueia/Libera Presença
-                if (SwitchCalor != null) SwitchCalor.IsEnabled = ePermitido; // Bloqueia/Libera Calor
-                if (SwitchAlarme != null) SwitchAlarme.IsEnabled = ePermitido; // Bloqueia/Libera Alarme
+                if (SwitchGeral != null) SwitchGeral.IsEnabled = ePermitido;
+                if (SwitchPresenca != null) SwitchPresenca.IsEnabled = ePermitido;
+                if (SwitchCalor != null) SwitchCalor.IsEnabled = ePermitido;
+                if (SwitchAlarme != null) SwitchAlarme.IsEnabled = ePermitido;
             });
         }
 
-        private async Task CarregarEstadoSensoresDoFirebase() // Lê a subcoleção de sensores do Firestore
+        private async Task CarregarEstadoSensoresDoFirebase()
         {
             try
             {
-                string cpfDono = Preferences.Get("CpfDono", string.Empty); // Resgata o CPF do Dono salvo no Login
-                if (string.IsNullOrEmpty(cpfDono)) return; // Aborta se CPF não estiver disponível
+                string cpfDono = Preferences.Get("CpfDonoCasa", string.Empty);
+                if (string.IsNullOrEmpty(cpfDono)) return;
 
-                // Garante que o Firebase esteja inicializado antes de consultar
+                // Garante a inicialização da conexão com Firebase
                 if (SistemaService.FirestoreDb == null)
                 {
                     await SistemaService.InicializarFirebase();
                     if (SistemaService.FirestoreDb == null) return;
                 }
 
-                _isUpdatingProgrammatically = true; // Ativa a trava para evitar disparar Toggled no carregamento
+                _isUpdatingProgrammatically = true;
 
-                // Busca o documento dentro do caminho: Usuarios/{cpfDono}/Sensores/estado
-                DocumentReference docRef = SistemaService.FirestoreDb.Collection("Usuarios")
-                                                                     .Document(cpfDono)
-                                                                     .Collection("Sensores")
-                                                                     .Document("estado");
+                DocumentReference docRef = SistemaService.FirestoreDb
+                    .Collection("Usuarios")
+                    .Document(cpfDono)
+                    .Collection("Sensores")
+                    .Document("estado");
 
-                DocumentSnapshot snapshot = await docRef.GetSnapshotAsync(); // Puxa dados da nuvem
+                DocumentSnapshot snapshot = await docRef.GetSnapshotAsync();
 
-                if (snapshot.Exists) // Se a subcoleção já existir
+                if (snapshot.Exists)
                 {
-                    snapshot.TryGetValue("presencaAtivo", out bool presenca); // Extrai o valor de presença
-                    snapshot.TryGetValue("calorAtivo", out bool calor); // Extrai o valor de calor
-                    snapshot.TryGetValue("alarmeAtivo", out bool alarme); // Extrai o valor de alarme
+                    snapshot.TryGetValue("presencaAtivo", out bool presenca);
+                    snapshot.TryGetValue("calorAtivo", out bool calor);
+                    snapshot.TryGetValue("alarmeAtivo", out bool alarme);
 
-                    SistemaService.PresencaAtivo = presenca; // Atualiza a memória local no service
-                    SistemaService.CalorAtivo = calor; // Atualiza a memória local no service
-                    SistemaService.AlarmeAtivo = alarme; // Atualiza a memória local no service
+                    SistemaService.PresencaAtivo = presenca;
+                    SistemaService.CalorAtivo = calor;
+                    SistemaService.AlarmeAtivo = alarme;
 
-                    MainThread.BeginInvokeOnMainThread(() => // Atualiza chaves na interface
+                    MainThread.BeginInvokeOnMainThread(() =>
                     {
-                        if (SwitchPresenca != null) SwitchPresenca.IsToggled = presenca; // Seta botão presença
-                        if (SwitchCalor != null) SwitchCalor.IsToggled = calor; // Seta botão calor
-                        if (SwitchAlarme != null) SwitchAlarme.IsToggled = alarme; // Seta botão alarme
-                        if (SwitchGeral != null) SwitchGeral.IsToggled = presenca && calor && alarme; // Seta botão geral se todos ativos
+                        if (SwitchPresenca != null) SwitchPresenca.IsToggled = presenca;
+                        if (SwitchCalor != null) SwitchCalor.IsToggled = calor;
+                        if (SwitchAlarme != null) SwitchAlarme.IsToggled = alarme;
+                        if (SwitchGeral != null) SwitchGeral.IsToggled = presenca && calor && alarme;
                     });
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Erro ao carregar sensores: {ex.Message}"); // Log de exceção
+                System.Diagnostics.Debug.WriteLine($"Erro ao carregar sensores: {ex.Message}");
             }
             finally
             {
-                _isUpdatingProgrammatically = false; // Desativa a trava com segurança
+                _isUpdatingProgrammatically = false;
             }
         }
 
-        private async Task SalvarEstadoSensoresNoFirebase() // Persiste qualquer alteração de switch no banco
+        private async Task SalvarEstadoSensoresNoFirebase()
         {
             try
             {
-                string cpfDono = Preferences.Get("CpfDono", string.Empty); // Obtém CPF do Dono
+                string cpfDono = Preferences.Get("CpfDonoCasa", string.Empty);
                 if (string.IsNullOrEmpty(cpfDono)) return;
 
                 if (SistemaService.FirestoreDb == null)
@@ -129,133 +141,136 @@ namespace dfgger
                     if (SistemaService.FirestoreDb == null) return;
                 }
 
-                DocumentReference docRef = SistemaService.FirestoreDb.Collection("Usuarios") // Referência da subcoleção
-                                                                     .Document(cpfDono)
-                                                                     .Collection("Sensores")
-                                                                     .Document("estado");
+                DocumentReference docRef = SistemaService.FirestoreDb
+                    .Collection("Usuarios")
+                    .Document(cpfDono)
+                    .Collection("Sensores")
+                    .Document("estado");
 
-                Dictionary<string, object> dados = new Dictionary<string, object> // Dicionário atualizado
+                Dictionary<string, object> dados = new Dictionary<string, object>
                 {
-                    { "presencaAtivo", SistemaService.PresencaAtivo }, // Estado do sensor de presença
-                    { "calorAtivo", SistemaService.CalorAtivo }, // Estado do sensor de calor
-                    { "alarmeAtivo", SistemaService.AlarmeAtivo } // Estado do alarme sonoro
+                    { "presencaAtivo", SistemaService.PresencaAtivo },
+                    { "calorAtivo", SistemaService.CalorAtivo },
+                    { "alarmeAtivo", SistemaService.AlarmeAtivo }
                 };
 
-                await docRef.SetAsync(dados, SetOptions.MergeAll); // Salva ou mescla os dados na nuvem
+                await docRef.SetAsync(dados, SetOptions.MergeAll);
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Erro ao salvar sensores: {ex.Message}"); // Imprime log
+                System.Diagnostics.Debug.WriteLine($"Erro ao salvar sensores: {ex.Message}");
             }
         }
 
-        private void VerificarSistemaAutomaticamente() // Checa conectividade de rede e Firebase
+        private void VerificarSistemaAutomaticamente()
         {
             try
             {
-                bool temInternet = Connectivity.Current.NetworkAccess == NetworkAccess.Internet; // Confirma se há acesso à internet
-                bool firebaseOnline = SistemaService.IsFirebaseConectado; // Confirma conexão com Firebase
+                bool temInternet = Connectivity.Current.NetworkAccess == NetworkAccess.Internet;
+                bool firebaseOnline = SistemaService.IsFirebaseConectado;
 
-                MainThread.BeginInvokeOnMainThread(() => // Aplica alterações na UI
+                MainThread.BeginInvokeOnMainThread(() =>
                 {
+                    if (StatusIndicator == null || StatusLabel == null) return;
+
                     if (temInternet && firebaseOnline)
                     {
-                        StatusIndicator.Fill = Colors.Green; // Cor verde para status online
-                        StatusLabel.Text = "Sistema Online"; // Texto status ok
+                        StatusIndicator.Fill = Colors.Green;
+                        StatusLabel.Text = "Sistema Online";
                     }
                     else if (temInternet && !firebaseOnline)
                     {
-                        StatusIndicator.Fill = Colors.Yellow; // Cor amarela para alerta
-                        StatusLabel.Text = "Atenção: Firebase Offline"; // Sinaliza erro do banco
+                        StatusIndicator.Fill = Colors.Yellow;
+                        StatusLabel.Text = "Atenção: Firebase Offline";
                     }
                     else
                     {
-                        StatusIndicator.Fill = Colors.Red; // Cor vermelha sem internet
-                        StatusLabel.Text = "Sistema Offline (Sem Rede)"; // Sinaliza falta de conexão
+                        StatusIndicator.Fill = Colors.Red;
+                        StatusLabel.Text = "Sistema Offline (Sem Rede)";
                     }
                 });
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Erro status: {ex.Message}"); // Trata exceção de checagem
+                System.Diagnostics.Debug.WriteLine($"Erro ao verificar status do sistema: {ex.Message}");
             }
         }
 
-        private async void OnGeralToggled(object sender, ToggledEventArgs e) // Evento disparado no Switch Geral
+        private async void OnGeralToggled(object sender, ToggledEventArgs e)
         {
-            if (_isUpdatingProgrammatically) return; // Ignores disparos efetuados via código C#
+            if (_isUpdatingProgrammatically) return;
 
             try
             {
-                bool estado = e.Value; // Captura novo valor (true/false)
+                bool estado = e.Value;
 
-                _isUpdatingProgrammatically = true; // Ativa trava
-                if (SwitchPresenca != null) SwitchPresenca.IsToggled = estado; // Ajusta presença
-                if (SwitchCalor != null) SwitchCalor.IsToggled = estado; // Ajusta calor
-                if (SwitchAlarme != null) SwitchAlarme.IsToggled = estado; // Ajusta alarme
-                _isUpdatingProgrammatically = false; // Desativa trava
+                _isUpdatingProgrammatically = true;
+                if (SwitchPresenca != null) SwitchPresenca.IsToggled = estado;
+                if (SwitchCalor != null) SwitchCalor.IsToggled = estado;
+                if (SwitchAlarme != null) SwitchAlarme.IsToggled = estado;
+                _isUpdatingProgrammatically = false;
 
-                SistemaService.PresencaAtivo = estado; // Seta presença na memória
-                SistemaService.CalorAtivo = estado; // Seta calor na memória
-                SistemaService.AlarmeAtivo = estado; // Seta alarme na memória
+                SistemaService.PresencaAtivo = estado;
+                SistemaService.CalorAtivo = estado;
+                SistemaService.AlarmeAtivo = estado;
 
-                await SalvarEstadoSensoresNoFirebase(); // Grava a atualização em lote no Firestore
-                SistemaService.AdicionarLog("Sistema Geral", estado); // Gera registro de log
+                await SalvarEstadoSensoresNoFirebase();
+                SistemaService.AdicionarLog("Sistema Geral", estado);
             }
             catch (Exception ex)
             {
-                _isUpdatingProgrammatically = false; // Libera trava em caso de falha
-                System.Diagnostics.Debug.WriteLine($"Erro Geral: {ex.Message}"); // Log de erro
+                _isUpdatingProgrammatically = false;
+                System.Diagnostics.Debug.WriteLine($"Erro ao alterar controle geral: {ex.Message}");
             }
         }
 
-        private async void OnSensorToggled(object sender, ToggledEventArgs e) // Evento disparado em switches individuais
+        private async void OnSensorToggled(object sender, ToggledEventArgs e)
         {
-            if (_isUpdatingProgrammatically) return; // Aborta se veio de alteração pelo Controle Geral
+            if (_isUpdatingProgrammatically) return;
 
             try
             {
-                if (sender is Switch switchOriginal) // Mapeia a origem do clique
+                if (sender is Switch switchOriginal)
                 {
-                    if (switchOriginal == SwitchPresenca) // Caso altere o sensor de presença
+                    if (switchOriginal == SwitchPresenca)
                     {
-                        SistemaService.PresencaAtivo = e.Value; // Atualiza variável
-                        SistemaService.AdicionarLog("Sensor de Presença", e.Value); // Registra no histórico
+                        SistemaService.PresencaAtivo = e.Value;
+                        SistemaService.AdicionarLog("Sensor de Presença", e.Value);
                     }
-                    else if (switchOriginal == SwitchCalor) // Caso altere o sensor de calor
+                    else if (switchOriginal == SwitchCalor)
                     {
-                        SistemaService.CalorAtivo = e.Value; // Atualiza variável
-                        SistemaService.AdicionarLog("Sensor de Calor", e.Value); // Registra no histórico
+                        SistemaService.CalorAtivo = e.Value;
+                        SistemaService.AdicionarLog("Sensor de Calor", e.Value);
                     }
-                    else if (switchOriginal == SwitchAlarme) // Caso altere o alarme
+                    else if (switchOriginal == SwitchAlarme)
                     {
-                        SistemaService.AlarmeAtivo = e.Value; // Atualiza variável
-                        SistemaService.AdicionarLog("Alarme Sonoro", e.Value); // Registra no histórico
+                        SistemaService.AlarmeAtivo = e.Value;
+                        SistemaService.AdicionarLog("Alarme Sonoro", e.Value);
                     }
 
-                    await SalvarEstadoSensoresNoFirebase(); // Grava a mudança individual no Firestore
+                    await SalvarEstadoSensoresNoFirebase();
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Erro Sensor: {ex.Message}"); // Log de exceção
+                System.Diagnostics.Debug.WriteLine($"Erro ao alterar sensor individual: {ex.Message}");
             }
         }
 
-        private async void OnVerLogsClicked(object sender, EventArgs e) // Abre histórico
+        private async void OnVerLogsClicked(object sender, EventArgs e)
         {
-            await Navigation.PushAsync(new LogsPage()); // Navega para tela LogsPage
+            await Navigation.PushAsync(new LogsPage());
         }
 
-        private void OnSimularSensorClicked(object sender, EventArgs e) // Simulação manual do sensor de movimento
+        private async void OnSimularSensorClicked(object sender, EventArgs e)
         {
-            SistemaService.RegistrarEventoExterno("Sensor de Presença", "MOVIMENTO DETECTADO!"); // Gera entrada de teste
-            DisplayAlert("Alerta!", "Movimento detectado pelo sensor", "OK"); // Exibe alerta pop-up
+            SistemaService.RegistrarEventoExterno("Sensor de Presença", "MOVIMENTO DETECTADO!");
+            await DisplayAlert("Alerta!", "Movimento detectado pelo sensor", "OK");
         }
 
-        private async void OnVerMembrosClicked(object sender, EventArgs e) // Abre membros da família
+        private async void OnVerMembrosClicked(object sender, EventArgs e)
         {
-            await Navigation.PushAsync(new MembrosFamiliaPage()); // Navega para MembrosFamiliaPage
+            await Navigation.PushAsync(new MembrosFamiliaPage());
         }
     }
 }
