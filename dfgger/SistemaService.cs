@@ -3,14 +3,15 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Maui.Graphics;
-using Microsoft.Maui.Storage; // Necessário para ler o FileSystem do MAUI
-using Google.Cloud.Firestore;  // O motor do Firebase
+using Microsoft.Maui.Storage;
+using Google.Cloud.Firestore;
+using Google.Apis.Auth.OAuth2;
 
 namespace dfgger
 {
     public static class SistemaService
     {
-        // Propriedade pública para que a DashboardPage e outras telas acessem a conexão
+        // Propriedade pública para conexão com o Firestore
         public static FirestoreDb? FirestoreDb { get; set; }
 
         // Estados atuais
@@ -33,17 +34,18 @@ namespace dfgger
             {
                 // Abre o arquivo conexao.json na pasta Resources/Raw
                 using var stream = await FileSystem.OpenAppPackageFileAsync("conexao.json");
-                using var reader = new StreamReader(stream);
-                string jsonConteudo = await reader.ReadToEndAsync();
 
-                // Configura o construtor com o ID do projeto do TCC
+                // Carrega as credenciais via GoogleCredential (evita erros no Android)
+                var credential = GoogleCredential.FromStream(stream);
+
+                // Configura o construtor com o ID do seu projeto
                 var builder = new FirestoreDbBuilder
                 {
                     ProjectId = "banco-tcc-dc633",
-                    JsonCredentials = jsonConteudo
+                    Credential = credential
                 };
 
-                // Atribui a conexão diretamente à propriedade pública FirestoreDb
+                // Atribui a conexão à propriedade pública FirestoreDb
                 FirestoreDb = await builder.BuildAsync();
 
                 // Atualiza o status global para verdadeiro
@@ -63,7 +65,11 @@ namespace dfgger
             // Garante que o Firebase está ativo antes de fazer a busca
             await InicializarFirebase();
 
-            if (FirestoreDb == null) return false;
+            if (FirestoreDb == null)
+            {
+                System.Diagnostics.Debug.WriteLine("Erro: FirestoreDb não foi inicializado.");
+                return false;
+            }
 
             try
             {

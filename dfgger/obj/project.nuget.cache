@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "Dj3bOPXWdEA=",
+  "dgSpecHash": "iH8Gx7KbUoM=",
   "success": true,
-  "projectFilePath": "C:\\Users\\lucas\\OneDrive\\Documentos\\GitHub\\dfgger\\dfgger\\dfgger.csproj",
+  "projectFilePath": "C:\\Users\\lucas\\OneDrive\\Documentos\\GitHub\\Mobile-tcc\\dfgger\\dfgger.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\lucas\\.nuget\\packages\\google.api.commonprotos\\2.17.0\\google.api.commonprotos.2.17.0.nupkg.sha512",
     "C:\\Users\\lucas\\.nuget\\packages\\google.api.gax\\4.13.1\\google.api.gax.4.13.1.nupkg.sha512",
