@@ -21,13 +21,13 @@ build_property.EnforceExtendedAnalyzerRules =
 build_property.EntryPointFilePath = 
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = dfgger
-build_property.ProjectDir = C:\Users\lucas\OneDrive\Documentos\GitHub\dfgger\dfgger\
+build_property.ProjectDir = C:\Users\aluno\Documents\GitHub\Mobile-tcc\dfgger\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
 build_property.EffectiveAnalysisLevelStyle = 10.0
 build_property.EnableCodeStyleSeverity = 
 
-[C:/Users/lucas/OneDrive/Documentos/GitHub/dfgger/dfgger/App.xaml]
+[C:/Users/aluno/Documents/GitHub/Mobile-tcc/dfgger/App.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = dfgger.App.xaml
 build_metadata.AdditionalFiles.TargetPath = App.xaml
@@ -37,7 +37,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[C:/Users/lucas/OneDrive/Documentos/GitHub/dfgger/dfgger/AppShell.xaml]
+[C:/Users/aluno/Documents/GitHub/Mobile-tcc/dfgger/AppShell.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = dfgger.AppShell.xaml
 build_metadata.AdditionalFiles.TargetPath = AppShell.xaml
@@ -47,7 +47,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[C:/Users/lucas/OneDrive/Documentos/GitHub/dfgger/dfgger/BoasVindas.xaml]
+[C:/Users/aluno/Documents/GitHub/Mobile-tcc/dfgger/BoasVindas.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = dfgger.BoasVindas.xaml
 build_metadata.AdditionalFiles.TargetPath = BoasVindas.xaml
@@ -57,7 +57,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[C:/Users/lucas/OneDrive/Documentos/GitHub/dfgger/dfgger/DashboardPage.xaml]
+[C:/Users/aluno/Documents/GitHub/Mobile-tcc/dfgger/DashboardPage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = dfgger.DashboardPage.xaml
 build_metadata.AdditionalFiles.TargetPath = DashboardPage.xaml
@@ -67,7 +67,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[C:/Users/lucas/OneDrive/Documentos/GitHub/dfgger/dfgger/LoginPage.xaml]
+[C:/Users/aluno/Documents/GitHub/Mobile-tcc/dfgger/LoginPage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = dfgger.LoginPage.xaml
 build_metadata.AdditionalFiles.TargetPath = LoginPage.xaml
@@ -77,7 +77,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[C:/Users/lucas/OneDrive/Documentos/GitHub/dfgger/dfgger/LogsPage.xaml]
+[C:/Users/aluno/Documents/GitHub/Mobile-tcc/dfgger/LogsPage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = dfgger.LogsPage.xaml
 build_metadata.AdditionalFiles.TargetPath = LogsPage.xaml
@@ -87,7 +87,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[C:/Users/lucas/OneDrive/Documentos/GitHub/dfgger/dfgger/MainPage.xaml]
+[C:/Users/aluno/Documents/GitHub/Mobile-tcc/dfgger/MainPage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = dfgger.MainPage.xaml
 build_metadata.AdditionalFiles.TargetPath = MainPage.xaml
@@ -97,7 +97,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[C:/Users/lucas/OneDrive/Documentos/GitHub/dfgger/dfgger/MembrosFamiliaPage.xaml]
+[C:/Users/aluno/Documents/GitHub/Mobile-tcc/dfgger/MembrosFamiliaPage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = dfgger.MembrosFamiliaPage.xaml
 build_metadata.AdditionalFiles.TargetPath = MembrosFamiliaPage.xaml
@@ -107,7 +107,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[C:/Users/lucas/OneDrive/Documentos/GitHub/dfgger/dfgger/Resources/Styles/Colors.xaml]
+[C:/Users/aluno/Documents/GitHub/Mobile-tcc/dfgger/Resources/Styles/Colors.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = dfgger.Resources.Styles.Colors.xaml
 build_metadata.AdditionalFiles.TargetPath = Resources\Styles\Colors.xaml
@@ -117,7 +117,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[C:/Users/lucas/OneDrive/Documentos/GitHub/dfgger/dfgger/Resources/Styles/Styles.xaml]
+[C:/Users/aluno/Documents/GitHub/Mobile-tcc/dfgger/Resources/Styles/Styles.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = dfgger.Resources.Styles.Styles.xaml
 build_metadata.AdditionalFiles.TargetPath = Resources\Styles\Styles.xaml

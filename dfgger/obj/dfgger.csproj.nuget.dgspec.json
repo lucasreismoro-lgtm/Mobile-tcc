@@ -1,24 +1,24 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\lucas\\OneDrive\\Documentos\\GitHub\\dfgger\\dfgger\\dfgger.csproj": {}
+    "C:\\Users\\aluno\\Documents\\GitHub\\Mobile-tcc\\dfgger\\dfgger.csproj": {}
   },
   "projects": {
-    "C:\\Users\\lucas\\OneDrive\\Documentos\\GitHub\\dfgger\\dfgger\\dfgger.csproj": {
+    "C:\\Users\\aluno\\Documents\\GitHub\\Mobile-tcc\\dfgger\\dfgger.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\lucas\\OneDrive\\Documentos\\GitHub\\dfgger\\dfgger\\dfgger.csproj",
+        "projectUniqueName": "C:\\Users\\aluno\\Documents\\GitHub\\Mobile-tcc\\dfgger\\dfgger.csproj",
         "projectName": "dfgger",
-        "projectPath": "C:\\Users\\lucas\\OneDrive\\Documentos\\GitHub\\dfgger\\dfgger\\dfgger.csproj",
-        "packagesPath": "C:\\Users\\lucas\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\lucas\\OneDrive\\Documentos\\GitHub\\dfgger\\dfgger\\obj\\",
+        "projectPath": "C:\\Users\\aluno\\Documents\\GitHub\\Mobile-tcc\\dfgger\\dfgger.csproj",
+        "packagesPath": "C:\\Users\\aluno\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\aluno\\Documents\\GitHub\\Mobile-tcc\\dfgger\\obj\\",
         "projectStyle": "PackageReference",
         "crossTargeting": true,
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\lucas\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\aluno\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -72,6 +72,10 @@
           "framework": "net10.0-android36.0",
           "targetAlias": "net10.0-android",
           "dependencies": {
+            "FirebaseDatabase.net": {
+              "target": "Package",
+              "version": "[5.0.0, )"
+            },
             "Google.Cloud.Firestore": {
               "target": "Package",
               "version": "[4.3.0, )"
@@ -87,7 +91,7 @@
             "Microsoft.NET.ILLink.Tasks": {
               "suppressParent": "All",
               "target": "Package",
-              "version": "[10.0.9, )",
+              "version": "[10.0.11, )",
               "autoReferenced": true
             }
           },
@@ -102,12 +106,6 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
-          "downloadDependencies": [
-            {
-              "name": "Microsoft.NETCore.App.Ref",
-              "version": "[10.0.10, 10.0.10]"
-            }
-          ],
           "frameworkReferences": {
             "Microsoft.Android": {
               "privateAssets": "all"
@@ -119,7 +117,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.400-preview.0.26322.102/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.400/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.CSharp": "(,4.7.32767]",
             "Microsoft.VisualBasic": "(,10.4.32767]",
@@ -399,6 +397,10 @@
           "framework": "net10.0-ios26.5",
           "targetAlias": "net10.0-ios",
           "dependencies": {
+            "FirebaseDatabase.net": {
+              "target": "Package",
+              "version": "[5.0.0, )"
+            },
             "Google.Cloud.Firestore": {
               "target": "Package",
               "version": "[4.3.0, )"
@@ -414,7 +416,7 @@
             "Microsoft.NET.ILLink.Tasks": {
               "suppressParent": "All",
               "target": "Package",
-              "version": "[10.0.9, )",
+              "version": "[10.0.11, )",
               "autoReferenced": true
             }
           },
@@ -429,12 +431,6 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
-          "downloadDependencies": [
-            {
-              "name": "Microsoft.NETCore.App.Ref",
-              "version": "[10.0.10, 10.0.10]"
-            }
-          ],
           "frameworkReferences": {
             "Microsoft.iOS": {
               "privateAssets": "all"
@@ -446,7 +442,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.400-preview.0.26322.102/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.400/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.CSharp": "(,4.7.32767]",
             "Microsoft.VisualBasic": "(,10.4.32767]",
@@ -726,6 +722,10 @@
           "framework": "net10.0-maccatalyst26.5",
           "targetAlias": "net10.0-maccatalyst",
           "dependencies": {
+            "FirebaseDatabase.net": {
+              "target": "Package",
+              "version": "[5.0.0, )"
+            },
             "Google.Cloud.Firestore": {
               "target": "Package",
               "version": "[4.3.0, )"
@@ -741,7 +741,7 @@
             "Microsoft.NET.ILLink.Tasks": {
               "suppressParent": "All",
               "target": "Package",
-              "version": "[10.0.9, )",
+              "version": "[10.0.11, )",
               "autoReferenced": true
             }
           },
@@ -757,12 +757,6 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
-          "downloadDependencies": [
-            {
-              "name": "Microsoft.NETCore.App.Ref",
-              "version": "[10.0.10, 10.0.10]"
-            }
-          ],
           "frameworkReferences": {
             "Microsoft.MacCatalyst": {
               "privateAssets": "all"
@@ -774,7 +768,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.400-preview.0.26322.102/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.400/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.CSharp": "(,4.7.32767]",
             "Microsoft.VisualBasic": "(,10.4.32767]",
@@ -1054,6 +1048,10 @@
           "framework": "net10.0-windows10.0.19041",
           "targetAlias": "net10.0-windows10.0.19041.0",
           "dependencies": {
+            "FirebaseDatabase.net": {
+              "target": "Package",
+              "version": "[5.0.0, )"
+            },
             "Google.Cloud.Firestore": {
               "target": "Package",
               "version": "[4.3.0, )"
@@ -1092,7 +1090,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.400-preview.0.26322.102/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.400/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.CSharp": "(,4.7.32767]",
             "Microsoft.VisualBasic": "(,10.4.32767]",
