@@ -1,24 +1,28 @@
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Graphics;
 
-namespace dfgger;
-
-public partial class LogsPage : ContentPage
+namespace dfgger
 {
-    public LogsPage()
+    public partial class LogsPage : ContentPage
     {
-        InitializeComponent();
+        public LogsPage()
+        {
+            InitializeComponent();
+            LogList.ItemsSource = SistemaService.ListaDeLogs;
+        }
 
-        // Aqui conectamos o LogList direto na lista inteligente do SistemaService.
-        // Como ela é um ObservableCollection, a tela atualizará sozinha!
-        LogList.ItemsSource = SistemaService.ListaDeLogs;
+        protected override async void OnAppearing()
+        {
+            base.OnAppearing();
+            await SistemaService.CarregarLogsDoFirebaseAsync();
+        }
     }
-}
 
-// Classe que define como o log aparece na tela
-public class EventoLog
-{
-    public string Titulo { get; set; }
-    public string Horario { get; set; }
-    public Color StatusColor { get; set; }
+    // Classe necessária para o SistemaService reconhecer os logs
+    public class EventoLog
+    {
+        public string Titulo { get; set; } = string.Empty;
+        public string Horario { get; set; } = string.Empty;
+        public Color StatusColor { get; set; } = Colors.Gray;
+    }
 }

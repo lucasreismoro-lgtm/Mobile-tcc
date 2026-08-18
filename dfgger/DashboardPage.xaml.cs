@@ -14,6 +14,12 @@ namespace dfgger
         private IDispatcherTimer? _timer;
         private bool _isUpdatingProgrammatically = false;
 
+        // Guarda o estado anterior da detecção para disparar o alerta apenas 1 vez por detecção
+        private bool _ultimoEstadoYoloPessoa = false;
+
+        // Ouvinte em tempo real para mudanças no Firestore
+        private FirestoreChangeListener? _listenerSensores;
+
         public DashboardPage(string nome, string cargo)
         {
             InitializeComponent();
@@ -51,14 +57,21 @@ namespace dfgger
             _timer?.Start();
             AplicarPermissoesPorCargo();
             await CarregarEstadoSensoresDoFirebase();
+            IniciarEscutaSensoresEmTempoReal(); // Ativa o monitoramento em tempo real
             VerificarSistemaAutomaticamente();
         }
 
-        protected override void OnDisappearing()
+        protected override async void OnDisappearing()
         {
             base.OnDisappearing();
-            // Para o timer quando o usuário sai da tela para economizar recursos e evitar memory leak
             _timer?.Stop();
+
+            // Para o ouvinte do Firestore ao sair da página
+            if (_listenerSensores != null)
+            {
+                await _listenerSensores.StopAsync();
+                _listenerSensores = null;
+            }
         }
 
         private void AplicarPermissoesPorCargo()
@@ -82,7 +95,6 @@ namespace dfgger
                 string cpfDono = Preferences.Get("CpfDonoCasa", string.Empty);
                 if (string.IsNullOrEmpty(cpfDono)) return;
 
-                // Garante a inicialização da conexão com Firebase
                 if (SistemaService.FirestoreDb == null)
                 {
                     await SistemaService.InicializarFirebase();
@@ -125,6 +137,61 @@ namespace dfgger
             finally
             {
                 _isUpdatingProgrammatically = false;
+            }
+        }
+
+        // Escuta a câmera (yoloPessoa) e os sensores em tempo real
+        private void IniciarEscutaSensoresEmTempoReal()
+        {
+            try
+            {
+                string cpfDono = Preferences.Get("CpfDonoCasa", string.Empty);
+                if (string.IsNullOrEmpty(cpfDono) || SistemaService.FirestoreDb == null) return;
+
+                DocumentReference docRef = SistemaService.FirestoreDb
+                    .Collection("Usuarios")
+                    .Document(cpfDono)
+                    .Collection("Sensores")
+                    .Document("estado");
+
+                _listenerSensores = docRef.Listen(snapshot =>
+                {
+                    if (snapshot.Exists)
+                    {
+                        snapshot.TryGetValue("presencaAtivo", out bool presenca);
+                        snapshot.TryGetValue("calorAtivo", out bool calor);
+                        snapshot.TryGetValue("alarmeAtivo", out bool alarme);
+                        snapshot.TryGetValue("yoloPessoa", out bool yoloPessoa);
+
+                        // Dispara o alerta apenas na Borda de Subida (quando passa de false para true)
+                        bool dispararAlertaPopup = yoloPessoa && !_ultimoEstadoYoloPessoa;
+                        _ultimoEstadoYoloPessoa = yoloPessoa;
+
+                        SistemaService.PresencaAtivo = presenca;
+                        SistemaService.CalorAtivo = calor;
+                        SistemaService.AlarmeAtivo = alarme;
+
+                        MainThread.BeginInvokeOnMainThread(async () =>
+                        {
+                            _isUpdatingProgrammatically = true;
+                            if (SwitchPresenca != null) SwitchPresenca.IsToggled = presenca;
+                            if (SwitchCalor != null) SwitchCalor.IsToggled = calor;
+                            if (SwitchAlarme != null) SwitchAlarme.IsToggled = alarme;
+                            if (SwitchGeral != null) SwitchGeral.IsToggled = presenca && calor && alarme;
+                            _isUpdatingProgrammatically = false;
+
+                            // Dispara se o alarme/presença no app estiverem ligados e a câmera pegar uma pessoa
+                            if (dispararAlertaPopup && alarme && presenca)
+                            {
+                                await DisplayAlert("🚨 ALERTA DE SEGURANÇA", "Movimento/Invasor detectado pela Câmera!", "OK");
+                            }
+                        });
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Erro ao escutar sensores em tempo real: {ex.Message}");
             }
         }
 
