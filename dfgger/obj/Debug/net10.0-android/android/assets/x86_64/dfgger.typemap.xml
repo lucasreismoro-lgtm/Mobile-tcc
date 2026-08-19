@@ -1,4 +1,4 @@
-<api type="debug" assembly-name="dfgger" mvid="f483eb1cca3640d5ad29b427d5c59954">
+<api type="debug" assembly-name="dfgger" mvid="09b6e4b5e554402faee83c8f993610c7">
   <java-to-managed>
     <entry java-name="crc640448916cc936cbe3/MainActivity" managed-name="dfgger.MainActivity, dfgger" managed-type-token-id="33554449" />
     <entry java-name="crc640448916cc936cbe3/MainApplication" managed-name="dfgger.MainApplication, dfgger" managed-type-token-id="33554450" />
