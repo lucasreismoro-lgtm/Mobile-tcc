@@ -1,146 +1,77 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
+using Google.Cloud.Firestore;
+using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Graphics;
 using Microsoft.Maui.Storage;
-using Google.Cloud.Firestore;
-using Google.Apis.Auth.OAuth2;
 
 namespace dfgger
 {
     public static class SistemaService
     {
-        // Instância global do Firestore para a DashboardPage e outras páginas
         public static FirestoreDb? FirestoreDb { get; set; }
+        public static bool IsFirebaseConectado => FirestoreDb != null;
+        public static string CpfUsuarioAtual { get; set; } = string.Empty;
 
-        // Estados dos sensores em memória
-        public static bool PresencaAtivo { get; set; } = true;
-        public static bool CalorAtivo { get; set; } = true;
-        public static bool AlarmeAtivo { get; set; } = true;
-        public static bool IsFirebaseConectado { get; set; } = false;
+        public static bool PresencaAtivo { get; set; } = false;
+        public static bool CalorAtivo { get; set; } = false;
+        public static bool AlarmeAtivo { get; set; } = false;
 
-        // Lista de logs exibida na interface
         public static ObservableCollection<EventoLog> ListaDeLogs { get; set; } = new ObservableCollection<EventoLog>();
 
-        // ================= INICIALIZAÇÃO DO FIREBASE =================
         public static async Task InicializarFirebase()
         {
-            if (FirestoreDb != null) return;
-
             try
             {
-                // 1. Abre o arquivo conexao.json da pasta Raw como Stream binário
-                using var stream = await FileSystem.OpenAppPackageFileAsync("conexao.json");
+                if (FirestoreDb != null) return;
 
-                // 2. Lê a credencial injetando o escopo obrigatório do Firestore
-                var credential = GoogleCredential.FromStream(stream)
+                using var stream = await FileSystem.OpenAppPackageFileAsync("conexao.json");
+                var credential = Google.Apis.Auth.OAuth2.GoogleCredential.FromStream(stream)
                     .CreateScoped("https://www.googleapis.com/auth/datastore");
 
-                // 3. Constrói o cliente de banco de dados
-                var builder = new FirestoreDbBuilder
+                FirestoreDbBuilder builder = new FirestoreDbBuilder
                 {
                     ProjectId = "banco-tcc-dc633",
                     Credential = credential
                 };
 
                 FirestoreDb = await builder.BuildAsync();
-                IsFirebaseConectado = true;
-                System.Diagnostics.Debug.WriteLine("Firebase (SistemaService) inicializado com sucesso!");
+                Debug.WriteLine("[FIREBASE] Conectado com sucesso!");
             }
             catch (Exception ex)
             {
-                IsFirebaseConectado = false;
-                System.Diagnostics.Debug.WriteLine($"Erro ao inicializar Firebase no SistemaService: {ex.Message}");
+                Debug.WriteLine($"[ERRO FIREBASE INICIALIZACAO] {ex.Message}");
+                FirestoreDb = null;
             }
         }
 
-        // ================= REGISTRO E GRAVAÇÃO DE LOGS =================
-        public static void AdicionarLog(string titulo, bool status)
+        public static FirestoreDb ObterInstanciaFirestore()
         {
-            string mensagem = $"{titulo}: {(status ? "Ativado" : "Desativado")}";
-            Color cor = status ? Colors.Green : Colors.Red;
-
-            MainThread.BeginInvokeOnMainThread(() =>
-            {
-                ListaDeLogs.Insert(0, new EventoLog
-                {
-                    Titulo = mensagem,
-                    Horario = DateTime.Now.ToString("HH:mm:ss"),
-                    StatusColor = cor
-                });
-            });
-
-            _ = SalvarLogNoFirebaseAsync(titulo, mensagem);
+            return FirestoreDb;
         }
 
-        public static void RegistrarEventoExterno(string nomeSensor, string mensagem)
-        {
-            string detalhe = $"{nomeSensor}: {mensagem}";
-
-            MainThread.BeginInvokeOnMainThread(() =>
-            {
-                ListaDeLogs.Insert(0, new EventoLog
-                {
-                    Titulo = detalhe,
-                    Horario = DateTime.Now.ToString("HH:mm:ss"),
-                    StatusColor = Colors.Yellow
-                });
-            });
-
-            _ = SalvarLogNoFirebaseAsync(nomeSensor, mensagem);
-        }
-
-        // Grava o log na subcoleção "Historico" do dono da casa
-        private static async Task SalvarLogNoFirebaseAsync(string tipo, string mensagem)
-        {
-            try
-            {
-                string cpfDono = Preferences.Get("CpfDonoCasa", string.Empty);
-                if (string.IsNullOrEmpty(cpfDono) || FirestoreDb == null) return;
-
-                DocumentReference historicoRef = FirestoreDb
-                    .Collection("Usuarios")
-                    .Document(cpfDono)
-                    .Collection("Historico")
-                    .Document();
-
-                Dictionary<string, object> logData = new Dictionary<string, object>
-                {
-                    { "tipo", tipo },
-                    { "mensagem", mensagem },
-                    { "dataHora", FieldValue.ServerTimestamp }
-                };
-
-                await historicoRef.SetAsync(logData);
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Erro ao salvar log no Firebase: {ex.Message}");
-            }
-        }
-
-        // Carrega o histórico salvo no Firestore para exibir na LogsPage
         public static async Task CarregarLogsDoFirebaseAsync()
         {
             try
             {
-                string cpfDono = Preferences.Get("CpfDonoCasa", string.Empty);
+                if (FirestoreDb == null)
+                    await InicializarFirebase();
+
+                if (FirestoreDb == null) return;
+
+                string cpfDono = string.IsNullOrEmpty(CpfUsuarioAtual)
+                    ? Preferences.Get("CpfDonoCasa", string.Empty)
+                    : CpfUsuarioAtual;
+
                 if (string.IsNullOrEmpty(cpfDono)) return;
 
-                if (FirestoreDb == null)
-                {
-                    await InicializarFirebase();
-                    if (FirestoreDb == null) return;
-                }
-
-                Query query = FirestoreDb
-                    .Collection("Usuarios")
-                    .Document(cpfDono)
-                    .Collection("Historico")
-                    .OrderByDescending("dataHora")
-                    .Limit(30);
+                Query query = FirestoreDb.Collection("Usuarios")
+                                        .Document(cpfDono)
+                                        .Collection("Eventos")
+                                        .OrderByDescending("dataHora");
 
                 QuerySnapshot snapshot = await query.GetSnapshotAsync();
 
@@ -150,27 +81,93 @@ namespace dfgger
 
                     foreach (DocumentSnapshot doc in snapshot.Documents)
                     {
-                        if (!doc.Exists) continue;
-
-                        doc.TryGetValue("tipo", out string tipo);
-                        doc.TryGetValue("mensagem", out string mensagem);
-                        doc.TryGetValue("dataHora", out Timestamp timestamp);
-
-                        DateTime horaLocal = timestamp != null ? timestamp.ToDateTime().ToLocalTime() : DateTime.Now;
-
-                        ListaDeLogs.Add(new EventoLog
+                        if (doc.Exists)
                         {
-                            Titulo = string.IsNullOrEmpty(tipo) ? mensagem : $"{tipo}: {mensagem}",
-                            Horario = horaLocal.ToString("HH:mm:ss"),
-                            StatusColor = mensagem != null && mensagem.Contains("DETECTADO") ? Colors.Yellow : Colors.Green
-                        });
+                            string sensor = doc.ContainsField("sensor") ? doc.GetValue<string>("sensor") : "Sistema";
+                            string mensagem = doc.ContainsField("mensagem") ? doc.GetValue<string>("mensagem") : "Evento registrado";
+
+                            DateTime dataHora = DateTime.Now;
+                            if (doc.ContainsField("dataHora") && doc.GetValue<Timestamp?>("dataHora").HasValue)
+                            {
+                                dataHora = doc.GetValue<Timestamp>("dataHora").ToDateTime().ToLocalTime();
+                            }
+
+                            Color corStatus = Colors.Gray;
+                            if (sensor.Contains("Presença", StringComparison.OrdinalIgnoreCase))
+                                corStatus = Colors.Orange;
+                            else if (sensor.Contains("Calor", StringComparison.OrdinalIgnoreCase))
+                                corStatus = Colors.Red;
+                            else if (sensor.Contains("Sistema", StringComparison.OrdinalIgnoreCase) || mensagem.Contains("Ativado", StringComparison.OrdinalIgnoreCase))
+                                corStatus = Colors.Green;
+
+                            ListaDeLogs.Add(new EventoLog
+                            {
+                                Titulo = $"[{sensor}] {mensagem}",
+                                Horario = dataHora.ToString("dd/MM/yyyy HH:mm:ss"),
+                                StatusColor = corStatus
+                            });
+                        }
                     }
                 });
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Erro ao carregar logs do Firebase: {ex.Message}");
+                Debug.WriteLine($"[ERRO CARREGAR LOGS] {ex.Message}");
             }
+        }
+
+        // Método de registrar log local + gravar no Firebase Firestore
+        public static async Task RegistrarEventoAsync(string sensor, string mensagem)
+        {
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                ListaDeLogs.Insert(0, new EventoLog
+                {
+                    Titulo = $"[{sensor}] {mensagem}",
+                    Horario = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"),
+                    StatusColor = mensagem.Contains("Ativado", StringComparison.OrdinalIgnoreCase) ? Colors.Green : Colors.Gray
+                });
+            });
+
+            try
+            {
+                if (FirestoreDb == null) await InicializarFirebase();
+                if (FirestoreDb == null) return;
+
+                string cpfDono = string.IsNullOrEmpty(CpfUsuarioAtual)
+                    ? Preferences.Get("CpfDonoCasa", string.Empty)
+                    : CpfUsuarioAtual;
+
+                if (string.IsNullOrEmpty(cpfDono)) return;
+
+                var novoLog = new System.Collections.Generic.Dictionary<string, object>
+                {
+                    { "sensor", sensor },
+                    { "mensagem", mensagem },
+                    { "dataHora", Timestamp.FromDateTime(DateTime.UtcNow) }
+                };
+
+                await FirestoreDb.Collection("Usuarios")
+                                .Document(cpfDono)
+                                .Collection("Eventos")
+                                .AddAsync(novoLog);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[ERRO REGISTRAR EVENTO NO FIREBASE] {ex.Message}");
+            }
+        }
+
+        public static void AdicionarLog(string componente, bool estado)
+        {
+            string acao = estado ? "Ativado" : "Desativado";
+            string mensagem = $"{componente} foi {acao}.";
+            _ = RegistrarEventoAsync(componente, mensagem);
+        }
+
+        public static void RegistrarEventoExterno(string sensor, string mensagem)
+        {
+            _ = RegistrarEventoAsync(sensor, mensagem);
         }
     }
 }

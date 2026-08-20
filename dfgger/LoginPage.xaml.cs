@@ -32,7 +32,7 @@ namespace dfgger
             {
                 using var stream = await FileSystem.OpenAppPackageFileAsync("conexao.json");
 
-                // Adicionada a definicao explicita do escopo Datastore que o Android exige
+                // Definicao explicita do escopo Datastore que o Android exige
                 var credential = GoogleCredential.FromStream(stream)
                     .CreateScoped("https://www.googleapis.com/auth/datastore");
 
@@ -44,9 +44,9 @@ namespace dfgger
 
                 _db = await builder.BuildAsync();
 
-                // Sincroniza a conexão com o SistemaService para a Dashboard
+                // Sincroniza a instância com o SistemaService.
+                // O IsFirebaseConectado atualizará automaticamente para 'true' pois _db já não é nulo.
                 SistemaService.FirestoreDb = _db;
-                SistemaService.IsFirebaseConectado = true;
             }
             catch (Exception ex)
             {

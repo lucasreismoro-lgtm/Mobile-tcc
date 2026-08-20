@@ -1,5 +1,5 @@
+using System;
 using Microsoft.Maui.Controls;
-using Microsoft.Maui.Graphics;
 
 namespace dfgger
 {
@@ -8,21 +8,22 @@ namespace dfgger
         public LogsPage()
         {
             InitializeComponent();
-            LogList.ItemsSource = SistemaService.ListaDeLogs;
         }
 
         protected override async void OnAppearing()
         {
             base.OnAppearing();
+
+            // Atribui a lista de logs diretamente ao CollectionView x:Name="LogList"
+            LogList.ItemsSource = SistemaService.ListaDeLogs;
+
+            // Busca os dados atualizados do Firebase
             await SistemaService.CarregarLogsDoFirebaseAsync();
         }
-    }
 
-    // Classe necessária para o SistemaService reconhecer os logs
-    public class EventoLog
-    {
-        public string Titulo { get; set; } = string.Empty;
-        public string Horario { get; set; } = string.Empty;
-        public Color StatusColor { get; set; } = Colors.Gray;
+        private async void OnVoltarClicked(object sender, EventArgs e)
+        {
+            await Navigation.PopAsync();
+        }
     }
 }

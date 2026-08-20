@@ -14,10 +14,13 @@ namespace dfgger
         private IDispatcherTimer? _timer;
         private bool _isUpdatingProgrammatically = false;
 
-        // Guarda o estado anterior da detecção para disparar o alerta apenas 1 vez por detecção
-        private bool _ultimoEstadoYoloPessoa = false;
+        // Instância do serviço de escuta da coleção de Eventos
+        private readonly SensorAlertService _alertService = new SensorAlertService();
 
-        // Ouvinte em tempo real para mudanças no Firestore
+        // Variável de controle para ignorar o snapshot inicial da Dashboard
+        private bool _primeiraCargaSensores = true;
+
+        // Ouvinte em tempo real para mudanças de estado dos switches no Firestore
         private FirestoreChangeListener? _listenerSensores;
 
         public DashboardPage(string nome, string cargo)
@@ -57,8 +60,19 @@ namespace dfgger
             _timer?.Start();
             AplicarPermissoesPorCargo();
             await CarregarEstadoSensoresDoFirebase();
-            IniciarEscutaSensoresEmTempoReal(); // Ativa o monitoramento em tempo real
+
+            // Reseta a trava ao entrar na página
+            _primeiraCargaSensores = true;
+            IniciarEscutaSensoresEmTempoReal();
+
             VerificarSistemaAutomaticamente();
+
+            // Inicia a escuta em tempo real filtrada do SensorAlertService
+            string cpfDono = Preferences.Get("CpfDonoCasa", string.Empty);
+            if (!string.IsNullOrEmpty(cpfDono) && SistemaService.FirestoreDb != null)
+            {
+                _alertService.IniciarEscutaEventos(cpfDono, SistemaService.FirestoreDb);
+            }
         }
 
         protected override async void OnDisappearing()
@@ -66,7 +80,9 @@ namespace dfgger
             base.OnDisappearing();
             _timer?.Stop();
 
-            // Para o ouvinte do Firestore ao sair da página
+            // Interrompe as escutas ao sair da página para evitar vazamentos e alertas em lote
+            _alertService.PararEscuta();
+
             if (_listenerSensores != null)
             {
                 await _listenerSensores.StopAsync();
@@ -132,7 +148,7 @@ namespace dfgger
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Erro ao carregar sensores: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"[ERRO CARREGAR SENSORES] {ex.Message}");
             }
             finally
             {
@@ -140,7 +156,6 @@ namespace dfgger
             }
         }
 
-        // Escuta a câmera (yoloPessoa) e os sensores em tempo real
         private void IniciarEscutaSensoresEmTempoReal()
         {
             try
@@ -161,17 +176,12 @@ namespace dfgger
                         snapshot.TryGetValue("presencaAtivo", out bool presenca);
                         snapshot.TryGetValue("calorAtivo", out bool calor);
                         snapshot.TryGetValue("alarmeAtivo", out bool alarme);
-                        snapshot.TryGetValue("yoloPessoa", out bool yoloPessoa);
-
-                        // Dispara o alerta apenas na Borda de Subida (quando passa de false para true)
-                        bool dispararAlertaPopup = yoloPessoa && !_ultimoEstadoYoloPessoa;
-                        _ultimoEstadoYoloPessoa = yoloPessoa;
 
                         SistemaService.PresencaAtivo = presenca;
                         SistemaService.CalorAtivo = calor;
                         SistemaService.AlarmeAtivo = alarme;
 
-                        MainThread.BeginInvokeOnMainThread(async () =>
+                        MainThread.BeginInvokeOnMainThread(() =>
                         {
                             _isUpdatingProgrammatically = true;
                             if (SwitchPresenca != null) SwitchPresenca.IsToggled = presenca;
@@ -179,19 +189,19 @@ namespace dfgger
                             if (SwitchAlarme != null) SwitchAlarme.IsToggled = alarme;
                             if (SwitchGeral != null) SwitchGeral.IsToggled = presenca && calor && alarme;
                             _isUpdatingProgrammatically = false;
-
-                            // Dispara se o alarme/presença no app estiverem ligados e a câmera pegar uma pessoa
-                            if (dispararAlertaPopup && alarme && presenca)
-                            {
-                                await DisplayAlert("🚨 ALERTA DE SEGURANÇA", "Movimento/Invasor detectado pela Câmera!", "OK");
-                            }
                         });
+
+                        // Trava a primeira execução do listener para não re-disparar pop-ups ao carregar a página
+                        if (_primeiraCargaSensores)
+                        {
+                            _primeiraCargaSensores = false;
+                        }
                     }
                 });
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Erro ao escutar sensores em tempo real: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"[ERRO ESCUTA EM TEMPO REAL] {ex.Message}");
             }
         }
 
@@ -225,7 +235,7 @@ namespace dfgger
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Erro ao salvar sensores: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"[ERRO SALVAR SENSORES] {ex.Message}");
             }
         }
 
@@ -259,7 +269,7 @@ namespace dfgger
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Erro ao verificar status do sistema: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"[ERRO STATUS SISTEMA] {ex.Message}");
             }
         }
 
@@ -282,12 +292,11 @@ namespace dfgger
                 SistemaService.AlarmeAtivo = estado;
 
                 await SalvarEstadoSensoresNoFirebase();
-                SistemaService.AdicionarLog("Sistema Geral", estado);
             }
             catch (Exception ex)
             {
                 _isUpdatingProgrammatically = false;
-                System.Diagnostics.Debug.WriteLine($"Erro ao alterar controle geral: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"[ERRO TOGGLE GERAL] {ex.Message}");
             }
         }
 
@@ -299,28 +308,34 @@ namespace dfgger
             {
                 if (sender is Switch switchOriginal)
                 {
+                    string nomeSensor = "Sensor";
+
                     if (switchOriginal == SwitchPresenca)
                     {
                         SistemaService.PresencaAtivo = e.Value;
-                        SistemaService.AdicionarLog("Sensor de Presença", e.Value);
+                        nomeSensor = "Sensor de Presença";
                     }
                     else if (switchOriginal == SwitchCalor)
                     {
                         SistemaService.CalorAtivo = e.Value;
-                        SistemaService.AdicionarLog("Sensor de Calor", e.Value);
+                        nomeSensor = "Sensor de Calor";
                     }
                     else if (switchOriginal == SwitchAlarme)
                     {
                         SistemaService.AlarmeAtivo = e.Value;
-                        SistemaService.AdicionarLog("Alarme Sonoro", e.Value);
+                        nomeSensor = "Alarme";
                     }
 
+                    // 1. Salva o estado atual na coleção "Sensores/estado"
                     await SalvarEstadoSensoresNoFirebase();
+
+                    // 2. Registra o evento de ligar/desligar no Histórico/Logs
+                    SistemaService.AdicionarLog(nomeSensor, e.Value);
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Erro ao alterar sensor individual: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"[ERRO TOGGLE SENSOR] {ex.Message}");
             }
         }
 
@@ -329,15 +344,39 @@ namespace dfgger
             await Navigation.PushAsync(new LogsPage());
         }
 
-        private async void OnSimularSensorClicked(object sender, EventArgs e)
-        {
-            SistemaService.RegistrarEventoExterno("Sensor de Presença", "MOVIMENTO DETECTADO!");
-            await DisplayAlert("Alerta!", "Movimento detectado pelo sensor", "OK");
-        }
-
         private async void OnVerMembrosClicked(object sender, EventArgs e)
         {
             await Navigation.PushAsync(new MembrosFamiliaPage());
+        }
+
+        private async void OnLigarEmergenciaClicked(object sender, EventArgs e)
+        {
+            try
+            {
+                // Trava de segurança para evitar ligações acidentais
+                bool confirmar = await DisplayAlert(
+                    "EMERGÊNCIA",
+                    "Deseja realmente discar para o 190 (Polícia Militar)?",
+                    "Sim, Ligar",
+                    "Cancelar");
+
+                if (confirmar)
+                {
+                    if (PhoneDialer.Default.IsSupported)
+                    {
+                        PhoneDialer.Default.Open("190");
+                    }
+                    else
+                    {
+                        await DisplayAlert("Erro", "O recurso não é suportado neste dispositivo.", "OK");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[ERRO DISCAGEM 190] {ex.Message}");
+                await DisplayAlert("Erro", "Não foi possível abrir o discador de telefone.", "OK");
+            }
         }
     }
 }

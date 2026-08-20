@@ -1,10 +1,10 @@
-<api type="debug" assembly-name="dfgger" mvid="09b6e4b5e554402faee83c8f993610c7">
+<api type="debug" assembly-name="dfgger" mvid="00cb4e5a3c544d0fbad289ebb44b86e8">
   <java-to-managed>
-    <entry java-name="crc640448916cc936cbe3/MainActivity" managed-name="dfgger.MainActivity, dfgger" managed-type-token-id="33554449" />
-    <entry java-name="crc640448916cc936cbe3/MainApplication" managed-name="dfgger.MainApplication, dfgger" managed-type-token-id="33554450" />
+    <entry java-name="crc640448916cc936cbe3/MainActivity" managed-name="dfgger.MainActivity, dfgger" managed-type-token-id="33554450" />
+    <entry java-name="crc640448916cc936cbe3/MainApplication" managed-name="dfgger.MainApplication, dfgger" managed-type-token-id="33554451" />
   </java-to-managed>
   <managed-to-java>
-    <entry java-name="crc640448916cc936cbe3/MainActivity" managed-name="dfgger.MainActivity, dfgger" managed-type-token-id="33554449" />
-    <entry java-name="crc640448916cc936cbe3/MainApplication" managed-name="dfgger.MainApplication, dfgger" managed-type-token-id="33554450" />
+    <entry java-name="crc640448916cc936cbe3/MainActivity" managed-name="dfgger.MainActivity, dfgger" managed-type-token-id="33554450" />
+    <entry java-name="crc640448916cc936cbe3/MainApplication" managed-name="dfgger.MainApplication, dfgger" managed-type-token-id="33554451" />
   </managed-to-java>
 </api>
