@@ -1,8 +1,8 @@
 package mono;
 public class MonoPackageManager_Resources {
 	public static String[] Assemblies = new String[]{
-		/* We need to ensure that "dfgger.dll" comes first in this list. */
-		"dfgger.dll",
+		/* We need to ensure that "Security+.dll" comes first in this list. */
+		"Security+.dll",
 		"Google.Api.CommonProtos.dll",
 		"Google.Api.Gax.dll",
 		"Google.Api.Gax.Grpc.dll",

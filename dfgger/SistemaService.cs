@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
@@ -48,7 +49,7 @@ namespace dfgger
             }
         }
 
-        public static FirestoreDb ObterInstanciaFirestore()
+        public static FirestoreDb? ObterInstanciaFirestore()
         {
             return FirestoreDb;
         }
@@ -68,12 +69,12 @@ namespace dfgger
 
                 if (string.IsNullOrEmpty(cpfDono)) return;
 
-                Query query = FirestoreDb.Collection("Usuarios")
-                                        .Document(cpfDono)
-                                        .Collection("Eventos")
-                                        .OrderByDescending("dataHora");
+                // Consulta genérica na subcoleção (sem ordenar obrigatoriamente por dataHora)
+                CollectionReference eventosRef = FirestoreDb.Collection("Usuarios")
+                                                            .Document(cpfDono)
+                                                            .Collection("Eventos");
 
-                QuerySnapshot snapshot = await query.GetSnapshotAsync();
+                QuerySnapshot snapshot = await eventosRef.GetSnapshotAsync();
 
                 MainThread.BeginInvokeOnMainThread(() =>
                 {
@@ -100,7 +101,7 @@ namespace dfgger
                             else if (sensor.Contains("Sistema", StringComparison.OrdinalIgnoreCase) || mensagem.Contains("Ativado", StringComparison.OrdinalIgnoreCase))
                                 corStatus = Colors.Green;
 
-                            ListaDeLogs.Add(new EventoLog
+                            ListaDeLogs.Insert(0, new EventoLog
                             {
                                 Titulo = $"[{sensor}] {mensagem}",
                                 Horario = dataHora.ToString("dd/MM/yyyy HH:mm:ss"),
@@ -140,7 +141,7 @@ namespace dfgger
 
                 if (string.IsNullOrEmpty(cpfDono)) return;
 
-                var novoLog = new System.Collections.Generic.Dictionary<string, object>
+                var novoLog = new Dictionary<string, object>
                 {
                     { "sensor", sensor },
                     { "mensagem", mensagem },

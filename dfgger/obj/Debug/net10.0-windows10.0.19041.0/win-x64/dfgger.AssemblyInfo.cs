@@ -18,7 +18,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("dfgger")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0+d1be9b709a2b294c6ca89a7d5eb004600885f3a0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0+a4eb2a3fcb88fcfd371073365c09591fdb545cc0")]
 [assembly: System.Reflection.AssemblyProductAttribute("dfgger")]
 [assembly: System.Reflection.AssemblyTitleAttribute("dfgger")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

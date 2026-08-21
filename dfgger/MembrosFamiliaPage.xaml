@@ -1,77 +1,34 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="dfgger.MembrosFamiliaPage"
-             Title="Membros da Família"
-             BackgroundColor="#0B132B">
+<ContentPage BackgroundColor="#0B132B" Title="Membros da Família" x:Class="dfgger.MembrosFamiliaPage" xmlns="http://schemas.microsoft.com/dotnet/2021/maui" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
 
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="20">
 
-            <Label Text="Sua Família" 
-                   FontSize="26" 
-                   FontAttributes="Bold" 
-                   TextColor="White" 
-                   HorizontalOptions="Start" />
+            <Label FontAttributes="Bold" FontSize="26" HorizontalOptions="Start" Text="Sua Família" TextColor="White"/>
 
-            <Label Text="Membros cadastrados na sua residência:" 
-                   FontSize="14" 
-                   TextColor="#8D99AE" 
-                   HorizontalOptions="Start" />
+            <Label FontSize="14" HorizontalOptions="Start" Text="Membros cadastrados na sua residência:" TextColor="#8D99AE"/>
 
-            <ActivityIndicator x:Name="LoadingIndicator" 
-                               IsRunning="True" 
-                               IsVisible="True" 
-                               Color="#48CAE4" 
-                               HeightRequest="40" />
+            <ActivityIndicator Color="#48CAE4" HeightRequest="40" IsRunning="True" IsVisible="True" x:Name="LoadingIndicator"/>
 
-            <CollectionView x:Name="CvMembros" IsVisible="False">
+            <CollectionView IsVisible="False" x:Name="CvMembros">
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
-                        <Frame BackgroundColor="#1C2541" 
-                               CornerRadius="12" 
-                               HasShadow="True" 
-                               Margin="0,0,0,12" 
-                               Padding="15" 
-                               BorderColor="#3A506B">
+                        <Frame BackgroundColor="#1C2541" BorderColor="#3A506B" CornerRadius="12" HasShadow="True" Margin="0,0,0,12" Padding="15">
 
                             <Grid ColumnDefinitions="Auto, *, Auto" VerticalOptions="Center">
 
-                                <Frame Grid.Column="0" 
-                                       CornerRadius="25" 
-                                       HeightRequest="50" 
-                                       WidthRequest="50" 
-                                       Padding="0" 
-                                       BackgroundColor="#3A506B" 
-                                       BorderColor="Transparent" 
-                                       Margin="0,0,15,0">
-                                    <Label Text="👤" 
-                                           FontSize="22" 
-                                           HorizontalOptions="Center" 
-                                           VerticalOptions="Center" />
+                                <Frame BackgroundColor="#3A506B" BorderColor="Transparent" CornerRadius="25" Grid.Column="0" HeightRequest="50" Margin="0,0,15,0" Padding="0" WidthRequest="50">
+                                    <Label FontSize="22" HorizontalOptions="Center" Text="👤" VerticalOptions="Center"/>
                                 </Frame>
 
-                                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
-                                    <Label Text="{Binding Nome}" 
-                                           FontSize="18" 
-                                           FontAttributes="Bold" 
-                                           TextColor="White" />
+                                <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                    <Label FontAttributes="Bold" FontSize="18" Text="{Binding Nome}" TextColor="White"/>
 
-                                    <Label Text="{Binding Email}" 
-                                           FontSize="12" 
-                                           TextColor="#8D99AE" />
+                                    <Label FontSize="12" Text="{Binding Email}" TextColor="#8D99AE"/>
                                 </VerticalStackLayout>
 
-                                <Border Grid.Column="2" 
-                                        BackgroundColor="#0B2545" 
-                                        Stroke="#134074" 
-                                        StrokeShape="RoundRectangle 8" 
-                                        Padding="8,4" 
-                                        VerticalOptions="Center">
-                                    <Label Text="{Binding CargoExibicao}" 
-                                           FontSize="11" 
-                                           FontAttributes="Bold" 
-                                           TextColor="#EEF4F8" />
+                                <Border BackgroundColor="#0B2545" Grid.Column="2" Padding="8,4" Stroke="#134074" StrokeShape="RoundRectangle 8" VerticalOptions="Center">
+                                    <Label FontAttributes="Bold" FontSize="11" Text="{Binding CargoExibicao}" TextColor="#EEF4F8"/>
                                 </Border>
 
                             </Grid>
@@ -80,15 +37,10 @@
                 </CollectionView.ItemTemplate>
             </CollectionView>
 
-            <Label x:Name="LblSemMembros" 
-                   Text="Nenhum membro cadastrado até o momento." 
-                   TextColor="#8D99AE" 
-                   FontSize="14" 
-                   HorizontalOptions="Center" 
-                   IsVisible="False" 
-                   Margin="0,20,0,0" />
+            <Label FontSize="14" HorizontalOptions="Center" IsVisible="False" Margin="0,20,0,0" Text="Nenhum membro cadastrado até o momento." TextColor="#8D99AE" x:Name="LblSemMembros"/>
+
+            <Button BackgroundColor="#48CAE4" Clicked="BtnAdicionarMorador_Clicked" CornerRadius="12" FontAttributes="Bold" FontSize="16" HeightRequest="50" Margin="0,20,0,0" Text="Deseja adicionar um morador?" TextColor="#0B132B" x:Name="BtnAdicionarMorador"/>
 
         </VerticalStackLayout>
     </ScrollView>
-
 </ContentPage>

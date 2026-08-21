@@ -142,5 +142,13 @@ namespace dfgger
                 LoadingIndicator.IsVisible = false; // Esconde o carregador
             }
         }
+        private async void BtnAdicionarMorador_Clicked(object sender, EventArgs e)
+        {
+            await DisplayAlert(
+                "Adicionar Morador",
+                "Contate o provedor do seu serviço para adicionar moradores.",
+                "OK"
+            );
+        }
     }
 }

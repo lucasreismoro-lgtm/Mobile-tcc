@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -32,7 +33,7 @@ namespace dfgger
             {
                 using var stream = await FileSystem.OpenAppPackageFileAsync("conexao.json");
 
-                // Definicao explicita do escopo Datastore que o Android exige
+                // Definição explícita do escopo Datastore que o Android exige
                 var credential = GoogleCredential.FromStream(stream)
                     .CreateScoped("https://www.googleapis.com/auth/datastore");
 
@@ -44,13 +45,34 @@ namespace dfgger
 
                 _db = await builder.BuildAsync();
 
-                // Sincroniza a instância com o SistemaService.
-                // O IsFirebaseConectado atualizará automaticamente para 'true' pois _db já não é nulo.
+                // Sincroniza a instância com o SistemaService
                 SistemaService.FirestoreDb = _db;
             }
             catch (Exception ex)
             {
                 await DisplayAlert("Erro de Conexão", "Falha ao conectar com o banco: " + ex.Message, "OK");
+            }
+        }
+
+        private async Task AtualizarSessaoAtiva(string cpfLogado)
+        {
+            if (_db == null) return;
+
+            try
+            {
+                DocumentReference docSessao = _db.Collection("Sessaoativa").Document("SessaoAtiva");
+
+                Dictionary<string, object> dadosSessao = new Dictionary<string, object>
+                {
+                    { "cpf", cpfLogado }
+                };
+
+                // Atualiza o documento SessaoAtiva no Firestore para o ESP8266 identificar o novo usuário
+                await docSessao.SetAsync(dadosSessao, SetOptions.MergeAll);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao atualizar SessaoAtiva: {ex.Message}");
             }
         }
 
@@ -139,6 +161,9 @@ namespace dfgger
 
                 if (nomeValido && cepValido && idResValido)
                 {
+                    // Atualiza a sessão ativa no Firestore
+                    await AtualizarSessaoAtiva(cpfDonoCasa);
+
                     Preferences.Set("CpfDonoCasa", cpfDonoCasa);
                     Application.Current.MainPage = new NavigationPage(new DashboardPage(nomeEncontrado, cargoEncontrado));
                 }

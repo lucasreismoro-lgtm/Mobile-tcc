@@ -1,0 +1,10 @@
+<api type="debug" assembly-name="Security+" mvid="a624b3a79178442ba4caa589e7632eb7">
+  <java-to-managed>
+    <entry java-name="crc64ce1c7bc4debb09c9/MainActivity" managed-name="dfgger.MainActivity, Security+" managed-type-token-id="33554449" />
+    <entry java-name="crc64ce1c7bc4debb09c9/MainApplication" managed-name="dfgger.MainApplication, Security+" managed-type-token-id="33554450" />
+  </java-to-managed>
+  <managed-to-java>
+    <entry java-name="crc64ce1c7bc4debb09c9/MainActivity" managed-name="dfgger.MainActivity, Security+" managed-type-token-id="33554449" />
+    <entry java-name="crc64ce1c7bc4debb09c9/MainApplication" managed-name="dfgger.MainApplication, Security+" managed-type-token-id="33554450" />
+  </managed-to-java>
+</api>

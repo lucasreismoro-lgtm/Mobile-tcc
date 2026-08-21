@@ -36997,9 +36997,9 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\lucas\\OneDrive\\Documentos\\GitHub\\Mobile-tcc\\dfgger\\dfgger.csproj",
-      "projectName": "dfgger",
-      "projectPath": "C:\\Users\\lucas\\OneDrive\\Documentos\\GitHub\\Mobile-tcc\\dfgger\\dfgger.csproj",
+      "projectUniqueName": "C:\\Users\\lucas\\OneDrive\\Documentos\\GitHub\\Mobile-tcc\\dfgger\\Security+.csproj",
+      "projectName": "Security+",
+      "projectPath": "C:\\Users\\lucas\\OneDrive\\Documentos\\GitHub\\Mobile-tcc\\dfgger\\Security+.csproj",
       "packagesPath": "C:\\Users\\lucas\\.nuget\\packages\\",
       "outputPath": "C:\\Users\\lucas\\OneDrive\\Documentos\\GitHub\\Mobile-tcc\\dfgger\\obj\\",
       "projectStyle": "PackageReference",
